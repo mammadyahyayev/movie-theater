@@ -1,5 +1,6 @@
 package az.aistgroup.security;
 
+import az.aistgroup.security.jwt.TokenGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -17,10 +18,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Configuration
 public class SecurityConfig {
-    private final TokenProvider tokenProvider;
+    private final TokenGenerator tokenGenerator;
 
-    public SecurityConfig(TokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    public SecurityConfig(TokenGenerator tokenGenerator) {
+        this.tokenGenerator = tokenGenerator;
     }
 
     @Bean
@@ -28,7 +29,7 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(tokenGenerator), UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/**").authenticated()

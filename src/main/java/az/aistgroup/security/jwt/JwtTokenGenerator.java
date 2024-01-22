@@ -1,9 +1,11 @@
-package az.aistgroup.security;
+package az.aistgroup.security.jwt;
 
+import az.aistgroup.security.AppSecurityProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,9 +20,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+@Primary
 @Component
-public class TokenProvider {
-    private final Logger log = LoggerFactory.getLogger(TokenProvider.class);
+public class JwtTokenGenerator implements TokenGenerator {
+    private final Logger log = LoggerFactory.getLogger(JwtTokenGenerator.class);
 
     private static final String AUTHORITIES_KEY = "auth";
     private static final String AUTHORITIES_DELIMITER = ",";
@@ -29,13 +32,14 @@ public class TokenProvider {
     private final Key key;
     private final AppSecurityProperties appSecurityProperties;
 
-    public TokenProvider(AppSecurityProperties appSecurityProperties) {
+    public JwtTokenGenerator(AppSecurityProperties appSecurityProperties) {
         this.appSecurityProperties = appSecurityProperties;
         this.key = Keys.hmacShaKeyFor(appSecurityProperties.getTokenProperties().getBase64Secret().getBytes());
         this.jwtParser = Jwts.parserBuilder().setSigningKey(this.key).build();
     }
 
-    public String createToken(Authentication authentication, boolean rememberMe) {
+    @Override
+    public String generateToken(Authentication authentication, boolean rememberMe) {
         var tokenProperties = appSecurityProperties.getTokenProperties();
 
         String authorities = authentication.getAuthorities().stream()
@@ -59,6 +63,7 @@ public class TokenProvider {
                 .compact();
     }
 
+    @Override
     public Authentication getAuthentication(String token) {
         Claims claims = jwtParser.parseClaimsJws(token).getBody();
 
@@ -73,6 +78,7 @@ public class TokenProvider {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
+    @Override
     public boolean isValidToken(String token) {
         try {
             jwtParser.parseClaimsJws(token);
