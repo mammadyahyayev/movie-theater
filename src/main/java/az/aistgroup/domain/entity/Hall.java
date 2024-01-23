@@ -12,6 +12,7 @@ public class Hall extends AbstractAuditingEntity<Long> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @Column(unique = true)
     private String name;
 
     private int capacity;
