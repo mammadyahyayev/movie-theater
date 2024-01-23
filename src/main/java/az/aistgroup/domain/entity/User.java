@@ -23,7 +23,7 @@ public class User extends AbstractAuditingEntity<Long> {
     @Column(length = 50, unique = true, nullable = false)
     private String username;
 
-    @Column(length = 50, nullable = false)
+    @Column(name = "encoded_password", length = 100, nullable = false)
     private String password;
 
     @Override

@@ -13,10 +13,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 
+@Service
 public class DefaultUserService implements UserService, UserDetailsService {
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
@@ -67,7 +69,7 @@ public class DefaultUserService implements UserService, UserDetailsService {
         User user = new User();
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
-        user.setFatherName(user.getFatherName());
+        user.setFatherName(userDto.getFatherName());
         user.setUsername(userDto.getUsername().toLowerCase());
 
         String encodedPassword = passwordEncoder.encode(userDto.getPassword());

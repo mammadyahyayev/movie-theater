@@ -17,8 +17,6 @@ public record LoginDto(
         @NotNull
         @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH)
         @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-        String password,
-
-        boolean isRememberMe
+        String password
 ) {
 }

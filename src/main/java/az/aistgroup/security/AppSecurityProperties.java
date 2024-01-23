@@ -8,8 +8,10 @@ public class AppSecurityProperties {
 
     public static class TokenProperties {
         private String base64Secret;
-        private int tokenValidityInSeconds;
-        private int tokenValidityInSecondsForRememberMe;
+        private int accessTokenValidity;
+        private int refreshTokenValidity;
+        private String authorizationHeaderText;
+        private String tokenPrefix;
 
         public String getBase64Secret() {
             return base64Secret;
@@ -19,20 +21,36 @@ public class AppSecurityProperties {
             this.base64Secret = base64Secret;
         }
 
-        public int getTokenValidityInSeconds() {
-            return tokenValidityInSeconds;
+        public int getAccessTokenValidity() {
+            return accessTokenValidity;
         }
 
-        public void setTokenValidityInSeconds(int tokenValidityInSeconds) {
-            this.tokenValidityInSeconds = tokenValidityInSeconds;
+        public void setAccessTokenValidity(int accessTokenValidity) {
+            this.accessTokenValidity = accessTokenValidity;
         }
 
-        public int getTokenValidityInSecondsForRememberMe() {
-            return tokenValidityInSecondsForRememberMe;
+        public int getRefreshTokenValidity() {
+            return refreshTokenValidity;
         }
 
-        public void setTokenValidityInSecondsForRememberMe(int tokenValidityInSecondsForRememberMe) {
-            this.tokenValidityInSecondsForRememberMe = tokenValidityInSecondsForRememberMe;
+        public void setRefreshTokenValidity(int refreshTokenValidity) {
+            this.refreshTokenValidity = refreshTokenValidity;
+        }
+
+        public String getAuthorizationHeaderText() {
+            return authorizationHeaderText;
+        }
+
+        public void setAuthorizationHeaderText(String authorizationHeaderText) {
+            this.authorizationHeaderText = authorizationHeaderText;
+        }
+
+        public String getTokenPrefix() {
+            return tokenPrefix;
+        }
+
+        public void setTokenPrefix(String tokenPrefix) {
+            this.tokenPrefix = tokenPrefix;
         }
     }
 

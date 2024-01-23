@@ -29,11 +29,14 @@ spring:
       enabled: true
       path: /h2
 
+app:
   security:
     token-properties:
       base64-secret: 69fac438762f524ecb7adb18eb507cdb730164eaec3ad1684a9b6fb47e673ebf45f175deeaac63c09b33bbe97feef40c46fa75e785210a7bc1990331c7232b1f
-      token-validity-in-seconds: 86400 # 24 hours
-      token-validity-in-seconds-for-remember-me: 2592000 # 30 days
+      access-token-validity: 86400 # 24 hours
+      refresh-token-validity: 2592000 # 30 days
+      authorization-header-text: "Authorization"
+      token-prefix: "Bearer "
 
 logging:
   level:

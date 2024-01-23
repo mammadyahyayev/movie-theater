@@ -3,7 +3,9 @@ package az.aistgroup.security.jwt;
 import org.springframework.security.core.Authentication;
 
 public interface TokenGenerator {
-    String generateToken(Authentication authentication, boolean rememberMe);
+    String generateAccessToken(Authentication authentication);
+
+    String generateRefreshToken(Authentication authentication);
 
     Authentication getAuthentication(String token);
 

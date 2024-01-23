@@ -5,6 +5,7 @@ import az.aistgroup.domain.dto.UserDto;
 import az.aistgroup.security.jwt.TokenGenerator;
 import az.aistgroup.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -57,9 +58,27 @@ public class AuthenticationController {
         Authentication authentication = authManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = tokenGenerator.generateToken(authentication, loginDTO.isRememberMe());
-        String refreshToken = tokenGenerator.generateToken(authentication, loginDTO.isRememberMe());
+        String accessToken = tokenGenerator.generateAccessToken(authentication);
+        String refreshToken = tokenGenerator.generateRefreshToken(authentication);
         return new ResponseEntity<>(new JwtToken(accessToken, refreshToken), HttpStatus.OK);
+    }
+
+    @PostMapping("/token/refresh")
+    public ResponseEntity<JwtToken> getToken(@Valid @RequestBody RefreshTokenDto refreshTokenDto) {
+        Authentication authentication = tokenGenerator.getAuthentication(refreshTokenDto.refreshToken());
+        if (authentication == null) {
+            // Handle invalid refresh token
+        }
+
+        String accessToken = tokenGenerator.generateAccessToken(authentication);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return new ResponseEntity<>(new JwtToken(accessToken, refreshTokenDto.refreshToken()), HttpStatus.OK);
+    }
+
+    public record RefreshTokenDto(
+            @NotBlank(message = "Refresh token can not be null or empty!")
+            String refreshToken
+    ) {
     }
 
     public record JwtToken(String accessToken, String refreshToken) {

@@ -39,21 +39,25 @@ public class JwtTokenGenerator implements TokenGenerator {
     }
 
     @Override
-    public String generateToken(Authentication authentication, boolean rememberMe) {
+    public String generateAccessToken(Authentication authentication) {
         var tokenProperties = appSecurityProperties.getTokenProperties();
+        long now = (new Date()).getTime();
+        var validity = new Date(now + Duration.ofSeconds(tokenProperties.getAccessTokenValidity()).toMillis());
+        return generateToken(authentication, validity);
+    }
 
+    @Override
+    public String generateRefreshToken(Authentication authentication) {
+        var tokenProperties = appSecurityProperties.getTokenProperties();
+        long now = (new Date()).getTime();
+        long ms = now + Duration.ofSeconds(tokenProperties.getRefreshTokenValidity()).toMillis();
+        return generateToken(authentication, new Date(ms));
+    }
+
+    private String generateToken(Authentication authentication, Date validity) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(AUTHORITIES_DELIMITER));
-
-        long now = (new Date()).getTime();
-        Date validity;
-        if (rememberMe) {
-            long ms = now + Duration.ofSeconds(tokenProperties.getTokenValidityInSecondsForRememberMe()).toMillis();
-            validity = new Date(ms);
-        } else {
-            validity = new Date(now + Duration.ofSeconds(tokenProperties.getTokenValidityInSeconds()).toMillis());
-        }
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
