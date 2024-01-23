@@ -2,7 +2,10 @@ package az.aistgroup.domain.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -25,6 +28,14 @@ public class User extends AbstractAuditingEntity<Long> {
 
     @Column(name = "encoded_password", length = 100, nullable = false)
     private String password;
+
+    private BigDecimal balance;
+
+    @OneToMany(
+            fetch = FetchType.LAZY, mappedBy = "user",
+            orphanRemoval = true, cascade = CascadeType.ALL
+    )
+    private Set<Ticket> tickets = new HashSet<>();
 
     @Override
     public Long getId() {
@@ -74,6 +85,36 @@ public class User extends AbstractAuditingEntity<Long> {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
+
+    public Set<Ticket> getTickets() {
+        return tickets;
+    }
+
+    public void setTickets(Set<Ticket> tickets) {
+        this.tickets = tickets;
+    }
+
+    public void addTicket(Ticket ticket) {
+        if(ticket == null) return;
+
+        this.tickets.add(ticket);
+        ticket.setUser(this);
+    }
+
+    public void removeTicket(Ticket ticket) {
+        if(ticket == null) return;
+
+        ticket.setUser(null);
+        this.tickets.remove(ticket);
     }
 
     @Override

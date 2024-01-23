@@ -9,6 +9,10 @@ public class Ticket extends AbstractAuditingEntity<Long> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @Override
     public Long getId() {
         return this.id;
@@ -17,5 +21,13 @@ public class Ticket extends AbstractAuditingEntity<Long> {
     @Override
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

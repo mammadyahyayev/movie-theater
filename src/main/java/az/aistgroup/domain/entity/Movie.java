@@ -1,5 +1,6 @@
 package az.aistgroup.domain.entity;
 
+import az.aistgroup.domain.enumeration.MovieGenre;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,6 +11,11 @@ public class Movie extends AbstractAuditingEntity<Long> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    private String name;
+
+    @Enumerated(EnumType.STRING)
+    private MovieGenre genre;
+
     @Override
     public Long getId() {
         return this.id;
@@ -18,5 +24,21 @@ public class Movie extends AbstractAuditingEntity<Long> {
     @Override
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public MovieGenre getGenre() {
+        return genre;
+    }
+
+    public void setGenre(MovieGenre genre) {
+        this.genre = genre;
     }
 }
