@@ -1,6 +1,7 @@
 package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.MovieDto;
+import az.aistgroup.domain.dto.MovieViewDto;
 import az.aistgroup.domain.entity.Movie;
 import az.aistgroup.domain.mapper.MovieMapper;
 import az.aistgroup.exception.ResourceNotFoundException;
@@ -22,8 +23,8 @@ public class DefaultMovieService implements MovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieDto> getAllMovies() {
-        return movieRepository.getAllMovies();
+    public List<MovieViewDto> getAllMovies() {
+        return movieRepository.findAllForMovieView();
     }
 
     @Override

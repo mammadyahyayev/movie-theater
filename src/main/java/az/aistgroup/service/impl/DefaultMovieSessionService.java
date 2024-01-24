@@ -1,6 +1,7 @@
 package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.MovieSessionDto;
+import az.aistgroup.domain.dto.MovieSessionViewDto;
 import az.aistgroup.domain.entity.Hall;
 import az.aistgroup.domain.entity.MovieSession;
 import az.aistgroup.domain.mapper.MovieSessionMapper;
@@ -35,7 +36,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieSessionDto> getSessions() {
+    public List<MovieSessionViewDto> getSessions() {
         return movieSessionRepository.getAllMovieSessions();
     }
 

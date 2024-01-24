@@ -2,6 +2,7 @@ package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.domain.dto.UserDto;
+import az.aistgroup.domain.dto.UserViewDto;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.security.SecurityUtils;
 import az.aistgroup.service.UserService;
@@ -25,8 +26,8 @@ public class UserController {
 
     @GetMapping
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> users = userService.getAllUsers();
+    public ResponseEntity<List<UserViewDto>> getAllUsers() {
+        List<UserViewDto> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

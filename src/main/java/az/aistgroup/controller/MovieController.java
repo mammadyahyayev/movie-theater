@@ -1,6 +1,7 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.MovieDto;
+import az.aistgroup.domain.dto.MovieViewDto;
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.exception.InvalidRequestException;
 import az.aistgroup.security.AuthorityConstant;
@@ -24,8 +25,8 @@ public class MovieController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MovieDto>> getAllMovies() {
-        List<MovieDto> movies = movieService.getAllMovies();
+    public ResponseEntity<List<MovieViewDto>> getAllMovies() {
+        List<MovieViewDto> movies = movieService.getAllMovies();
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 

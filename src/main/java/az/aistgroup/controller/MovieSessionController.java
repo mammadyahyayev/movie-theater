@@ -1,6 +1,7 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.MovieSessionDto;
+import az.aistgroup.domain.dto.MovieSessionViewDto;
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.service.MovieSessionService;
@@ -22,8 +23,8 @@ public class MovieSessionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MovieSessionDto>> getAllSessions() {
-        List<MovieSessionDto> movies = movieSessionService.getSessions();
+    public ResponseEntity<List<MovieSessionViewDto>> getAllSessions() {
+        List<MovieSessionViewDto> movies = movieSessionService.getSessions();
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 

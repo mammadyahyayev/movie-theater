@@ -1,12 +1,13 @@
 package az.aistgroup.service;
 
 import az.aistgroup.domain.dto.MovieSessionDto;
+import az.aistgroup.domain.dto.MovieSessionViewDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 public interface MovieSessionService {
-    List<MovieSessionDto> getSessions();
+    List<MovieSessionViewDto> getSessions();
 
     MovieSessionDto getSessionById(Long id);
 

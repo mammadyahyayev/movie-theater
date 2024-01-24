@@ -2,6 +2,7 @@ package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.LoginDto;
 import az.aistgroup.domain.dto.UserDto;
+import az.aistgroup.domain.dto.UserViewDto;
 import az.aistgroup.domain.entity.User;
 import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
@@ -70,7 +71,7 @@ public class DefaultUserService implements UserService, UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserDto> getAllUsers() {
+    public List<UserViewDto> getAllUsers() {
         return userRepository.getAllUsers();
     }
 
