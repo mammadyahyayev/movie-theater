@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import static az.aistgroup.constants.ValidationConstant.PASSWORD_MAX_LENGTH;
 import static az.aistgroup.constants.ValidationConstant.PASSWORD_MIN_LENGTH;
@@ -35,6 +36,8 @@ public class UserDto implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    private BigDecimal balance;
+
     public UserDto() {
     }
 
@@ -43,6 +46,7 @@ public class UserDto implements Serializable {
         setLastName(user.getLastName());
         setFatherName(user.getFatherName());
         setUsername(user.getUsername());
+        setBalance(user.getBalance());
     }
 
     public String getFirstName() {
@@ -95,6 +99,14 @@ public class UserDto implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
     }
 
     @Override
