@@ -43,7 +43,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
@@ -52,7 +51,8 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/h2/**");
+        return (web) -> web.ignoring()
+                .requestMatchers("/h2/**", "/api-docs/**", "/swagger-ui/**");
     }
 
     @Bean
