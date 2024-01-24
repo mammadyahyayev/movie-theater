@@ -1,6 +1,7 @@
 package az.aistgroup.domain.entity;
 
 import az.aistgroup.domain.enumeration.MovieSessionTime;
+import az.aistgroup.exception.NoTicketsAvailableException;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -86,5 +87,13 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
 
     public void setHall(Hall hall) {
         this.hall = hall;
+    }
+
+    public void decreaseLeftTickets() {
+        if (this.ticketsLeft == 0) {
+            throw new NoTicketsAvailableException();
+        }
+
+        this.ticketsLeft--;
     }
 }

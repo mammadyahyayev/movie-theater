@@ -2,6 +2,7 @@ package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.domain.dto.TicketDto;
+import az.aistgroup.domain.dto.TicketRequestDto;
 import az.aistgroup.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -31,10 +32,17 @@ public class TicketController {
         return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<TicketDto> addTicket(@Valid @RequestBody TicketDto ticketDto) {
-        TicketDto ticket = ticketService.addTicket(ticketDto);
-        return new ResponseEntity<>(ticket, HttpStatus.CREATED);
+    @PostMapping("/buy")
+    public ResponseEntity<TicketDto> buyTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
+        TicketDto ticket = ticketService.buyTicket(ticketRequestDto);
+        return new ResponseEntity<>(ticket, HttpStatus.OK);
+    }
+
+    @PostMapping("/refund/{id}")
+    public ResponseEntity<OperationResponseDto> refundTicket(@PathVariable("id") Long ticketId) {
+        ticketService.refundTicket(ticketId);
+        var response = new OperationResponseDto(true, "Ticket with " + ticketId + " refunded...");
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -43,10 +51,4 @@ public class TicketController {
         return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<OperationResponseDto> deleteTicket(@PathVariable("id") Long id) {
-        ticketService.deleteTicket(id);
-        var response = new OperationResponseDto(true, "Ticket with " + id + " deleted...");
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
 }

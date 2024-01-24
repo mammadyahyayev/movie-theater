@@ -9,7 +9,7 @@ public class Seat extends AbstractAuditingEntity<Long> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
-    private String name;
+    private int seatNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hall_id")
@@ -25,12 +25,12 @@ public class Seat extends AbstractAuditingEntity<Long> {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public int getSeatNum() {
+        return seatNum;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setSeatNum(int seatNum) {
+        this.seatNum = seatNum;
     }
 
     public Hall getHall() {

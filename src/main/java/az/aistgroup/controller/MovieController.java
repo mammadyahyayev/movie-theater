@@ -3,11 +3,13 @@ package az.aistgroup.controller;
 import az.aistgroup.domain.dto.MovieDto;
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.exception.InvalidRequestException;
+import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.service.MovieService;
 import az.aistgroup.util.Strings;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,18 +36,21 @@ public class MovieController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<MovieDto> addMovie(@Valid @RequestBody MovieDto movieDto) {
         MovieDto movie = movieService.addMovie(movieDto);
         return new ResponseEntity<>(movie, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<MovieDto> updateMovie(@PathVariable("id") Long id, @Valid @RequestBody MovieDto movieDto) {
         MovieDto movie = movieService.updateMovie(id, movieDto);
         return new ResponseEntity<>(movie, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<OperationResponseDto> deleteMovie(@PathVariable("id") Long id) {
         movieService.deleteMovie(id);
         var response = new OperationResponseDto(true, "Movie with " + id + " deleted...");
