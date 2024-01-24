@@ -4,6 +4,7 @@ import az.aistgroup.domain.dto.LoginDto;
 import az.aistgroup.domain.dto.UserDto;
 import az.aistgroup.security.jwt.TokenGenerator;
 import az.aistgroup.service.UserService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.slf4j.Logger;
@@ -38,12 +39,15 @@ public class AuthenticationController {
         this.tokenGenerator = tokenGenerator;
     }
 
+    //TODO: Create RegisterDto, and create separate service method for registering
+    @SecurityRequirements(value = {})
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@Valid @RequestBody UserDto userDto) {
         UserDto user = userService.addUser(userDto);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
+    @SecurityRequirements(value = {})
     @PostMapping("/login")
     public ResponseEntity<JwtToken> login(@Valid @RequestBody LoginDto loginDTO) {
         LOG.debug("Request to authenticate user {}", loginDTO.username());

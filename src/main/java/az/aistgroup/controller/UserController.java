@@ -6,6 +6,13 @@ import az.aistgroup.domain.dto.UserViewDto;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.security.SecurityUtils;
 import az.aistgroup.service.UserService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +22,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The controller is used to manage users.
+ */
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -24,6 +34,12 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Fetches all users. Only ADMIN can get all available users.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns all available users.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserViewDto.class))})
+    })
     @GetMapping
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<List<UserViewDto>> getAllUsers() {
@@ -31,6 +47,17 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @Operation(summary = "Fetch a user by his username.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Return a user for given username.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))})
+    })
     @GetMapping("/{username}")
     public ResponseEntity<UserDto> getUserById(@PathVariable("username") String username) {
         checkUserHasPermission(username);
@@ -39,6 +66,12 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @Operation(summary = "Adds a new user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns a newly created user for given username.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))})
+    })
     @PostMapping
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<UserDto> addUser(@Valid @RequestBody UserDto userDto) {

@@ -9,6 +9,7 @@ public class ErrorResponse {
     private LocalDateTime timestamp;
 
     ErrorResponse() {
+        timestamp = LocalDateTime.now();
     }
 
     public static class Error {

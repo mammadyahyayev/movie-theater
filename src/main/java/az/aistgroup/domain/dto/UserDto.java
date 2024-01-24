@@ -40,7 +40,7 @@ public class UserDto implements Serializable {
 
     private BigDecimal balance;
 
-    private Set<String> authorities;
+    private Set<String> authorities = new HashSet<>();
 
     public UserDto() {
     }
