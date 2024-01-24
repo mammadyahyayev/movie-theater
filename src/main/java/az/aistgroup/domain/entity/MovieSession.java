@@ -26,6 +26,10 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hall_id")
+    private Hall hall;
+
     @Override
     public Long getId() {
         return this.id;
@@ -74,5 +78,13 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
 
     public void setMovie(Movie movie) {
         this.movie = movie;
+    }
+
+    public Hall getHall() {
+        return hall;
+    }
+
+    public void setHall(Hall hall) {
+        this.hall = hall;
     }
 }

@@ -2,6 +2,7 @@ package az.aistgroup.domain.dto;
 
 import az.aistgroup.domain.enumeration.MovieSessionTime;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
@@ -20,8 +21,13 @@ public class MovieSessionDto {
     @PositiveOrZero
     private int ticketsLeft;
 
-    public MovieSessionDto() {
+    @Positive
+    private Long movieId;
 
+    @Positive
+    private Long hallId;
+
+    public MovieSessionDto() {
     }
 
     public LocalDateTime getDate() {
@@ -54,5 +60,21 @@ public class MovieSessionDto {
 
     public void setTicketsLeft(int ticketsLeft) {
         this.ticketsLeft = ticketsLeft;
+    }
+
+    public Long getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(Long movieId) {
+        this.movieId = movieId;
+    }
+
+    public Long getHallId() {
+        return hallId;
+    }
+
+    public void setHallId(Long hallId) {
+        this.hallId = hallId;
     }
 }

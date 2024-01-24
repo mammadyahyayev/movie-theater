@@ -2,7 +2,10 @@ package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.MovieSessionDto;
 import az.aistgroup.domain.entity.MovieSession;
+import az.aistgroup.domain.mapper.MovieSessionMapper;
+import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
+import az.aistgroup.repository.MovieRepository;
 import az.aistgroup.repository.MovieSessionRepository;
 import az.aistgroup.service.MovieSessionService;
 import org.springframework.stereotype.Service;
@@ -14,9 +17,14 @@ import java.util.Objects;
 @Service
 public class DefaultMovieSessionService implements MovieSessionService {
     private final MovieSessionRepository movieSessionRepository;
+    private final MovieRepository movieRepository;
 
-    public DefaultMovieSessionService(MovieSessionRepository movieSessionRepository) {
+    public DefaultMovieSessionService(
+            MovieSessionRepository movieSessionRepository,
+            MovieRepository movieRepository
+    ) {
         this.movieSessionRepository = movieSessionRepository;
+        this.movieRepository = movieRepository;
     }
 
     @Override
@@ -27,7 +35,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
     @Override
     @Transactional(readOnly = true)
-    public MovieSessionDto getSessionById(Long id) {
+    public MovieSessionDto getSessionById(final Long id) {
         return movieSessionRepository.findById(id)
                 .map(session -> {
                     var sessionDto = new MovieSessionDto();
@@ -42,50 +50,46 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
     @Override
     @Transactional
-    public MovieSessionDto addSession(MovieSessionDto sessionDto) {
-        //TODO: Set movie in here
+    public MovieSessionDto addSession(final MovieSessionDto sessionDto) {
         Objects.requireNonNull(sessionDto, "sessionDto can not be null!");
 
-        var movieSession = new MovieSession();
-        movieSession.setDate(sessionDto.getDate());
-        movieSession.setSessionTime(sessionDto.getSessionTime());
-        movieSession.setPrice(sessionDto.getPrice());
-        movieSession.setTicketsLeft(sessionDto.getTicketsLeft());
+        var movieSession = MovieSessionMapper.toEntity(sessionDto);
+        movieRepository.findById(sessionDto.getMovieId())
+                .ifPresentOrElse(movieSession::setMovie,
+                        () -> {
+                            throw new ResourceNotFoundException("Movie with " + sessionDto.getMovieId() + " not found!");
+                        });
+
+        movieSessionRepository.findByHallId(sessionDto.getHallId())
+                .ifPresent((session) -> {
+                    throw new ResourceAlreadyExistException("There is a session for hall id: " + sessionDto.getHallId());
+                });
 
         MovieSession newSession = movieSessionRepository.save(movieSession);
-        var movieSessionDto = new MovieSessionDto();
-        movieSessionDto.setPrice(newSession.getPrice());
-        movieSessionDto.setSessionTime(newSession.getSessionTime());
-        movieSessionDto.setDate(newSession.getDate());
-        movieSessionDto.setTicketsLeft(newSession.getTicketsLeft());
-        // movieSessionDto.setPrice(newSession.getMovie());
-        return movieSessionDto;
+        return MovieSessionMapper.toDto(newSession);
     }
 
     @Override
     @Transactional
     public MovieSessionDto updateSession(final Long id, final MovieSessionDto sessionDto) {
-        //TODO: Set movie in here
         Objects.requireNonNull(id, "id can not be null!");
         Objects.requireNonNull(sessionDto, "sessionDto can not be null!");
 
         MovieSession movieSession = movieSessionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Session with " + id + " not found!"));
 
-        movieSession.setDate(sessionDto.getDate());
-        movieSession.setSessionTime(sessionDto.getSessionTime());
-        movieSession.setPrice(sessionDto.getPrice());
-        movieSession.setTicketsLeft(sessionDto.getTicketsLeft());
+        MovieSessionMapper.toEntityInPlace(sessionDto, movieSession);
 
-        MovieSession updatedSession = movieSessionRepository.save(movieSession);
-        var movieSessionDto = new MovieSessionDto();
-        movieSessionDto.setPrice(updatedSession.getPrice());
-        movieSessionDto.setSessionTime(updatedSession.getSessionTime());
-        movieSessionDto.setDate(updatedSession.getDate());
-        movieSessionDto.setTicketsLeft(updatedSession.getTicketsLeft());
+        if (!movieSession.getMovie().getId().equals(sessionDto.getMovieId())) {
+            movieRepository.findById(sessionDto.getMovieId())
+                    .ifPresentOrElse(movieSession::setMovie,
+                            () -> {
+                                throw new ResourceNotFoundException("Movie with " + sessionDto.getMovieId() + " not found!");
+                            });
+        }
 
-        // movieSessionDto.setPrice(updatedSession.getMovie());
-        return movieSessionDto;
+        var updatedSession = movieSessionRepository.save(movieSession);
+        return MovieSessionMapper.toDto(updatedSession);
     }
 
     @Override
