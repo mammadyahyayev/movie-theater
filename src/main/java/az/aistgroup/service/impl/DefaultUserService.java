@@ -5,12 +5,15 @@ import az.aistgroup.domain.dto.UserDto;
 import az.aistgroup.domain.entity.User;
 import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
+import az.aistgroup.repository.AuthorityRepository;
 import az.aistgroup.repository.UserRepository;
+import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.service.UserService;
 import az.aistgroup.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,9 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class DefaultUserService implements UserService, UserDetailsService {
@@ -30,13 +33,16 @@ public class DefaultUserService implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthorityRepository authorityRepository;
 
     public DefaultUserService(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            AuthorityRepository authorityRepository
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.authorityRepository = authorityRepository;
     }
 
     @Override
@@ -48,14 +54,16 @@ public class DefaultUserService implements UserService, UserDetailsService {
 
         return userRepository.findUserByUsername(username)
                 .map(this::createSecurityUser)
-                .orElseThrow(
-                        () -> new UsernameNotFoundException("User " + username + " was not found!")
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("User " + username + " was not found!"));
     }
 
     private UserDetails createSecurityUser(final User user) {
+        var authorities = user.getAuthorities().stream()
+                .map(authority -> new SimpleGrantedAuthority(authority.getName()))
+                .toList();
+
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getPassword(), Collections.emptyList()
+                user.getUsername(), user.getPassword(), authorities
         );
     }
 
@@ -75,9 +83,7 @@ public class DefaultUserService implements UserService, UserDetailsService {
 
         return userRepository.findUserByUsername(username)
                 .map(UserDto::new)
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("User " + username + " was not found!")
-                );
+                .orElseThrow(() -> new ResourceNotFoundException("User " + username + " was not found!"));
     }
 
     @Override
@@ -88,7 +94,7 @@ public class DefaultUserService implements UserService, UserDetailsService {
         userRepository.findUserByUsername(userDto.getUsername())
                 .ifPresent(u -> {
                     throw new ResourceAlreadyExistException(
-                            "Username %s is already exist!".formatted(userDto.getUsername())
+                            "Username '%s' is already exist!".formatted(userDto.getUsername())
                     );
                 });
 
@@ -107,7 +113,17 @@ public class DefaultUserService implements UserService, UserDetailsService {
         String encodedPassword = passwordEncoder.encode(userDto.getPassword());
         user.setPassword(encodedPassword);
 
-        this.userRepository.save(user);
+        Set<String> authorities = userDto.getAuthorities();
+        if (authorities.isEmpty()) {
+            authorityRepository.findById(AuthorityConstant.USER)
+                    .ifPresent(user::addAuthority);
+        } else {
+            authorities.forEach(authority ->
+                    authorityRepository.findById(authority).ifPresent(user::addAuthority)
+            );
+        }
+
+        userRepository.save(user);
         LOG.debug("User added {} on {}", user, LocalDateTime.now());
 
         return new UserDto(user);
@@ -115,18 +131,33 @@ public class DefaultUserService implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public UserDto updateUser(Long id, UserDto userDto) {
+    public UserDto updateUser(String username, UserDto userDto) {
         Objects.requireNonNull(userDto, "userDto can not be null!");
 
-        User user = userRepository.findUserByUsername(userDto.getUsername())
-                .orElseThrow(() -> new ResourceAlreadyExistException(
-                        "Username %s is already exist!".formatted(userDto.getUsername())
-                ));
+        var user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User '" + username + "' not found!"));
+
+        // user wants to change his username
+        if (!user.getUsername().equals(userDto.getUsername())) {
+            userRepository.findUserByUsername(userDto.getUsername())
+                    .ifPresentOrElse((u) -> {
+                        throw new ResourceAlreadyExistException("Username '" + u.getUsername() + "' is already exist!");
+                    }, () -> {
+                        user.setUsername(userDto.getUsername());
+                    });
+        }
 
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setFatherName(userDto.getFatherName());
         user.setBalance(userDto.getBalance());
+
+        var authorities = userDto.getAuthorities();
+        if (authorities != null && !authorities.isEmpty()) {
+            authorities.forEach(
+                    authority -> authorityRepository.findById(authority).ifPresent(user::addAuthority)
+            );
+        }
 
         this.userRepository.save(user);
         LOG.debug("User updated {} on {}", user, LocalDateTime.now());
@@ -138,26 +169,24 @@ public class DefaultUserService implements UserService, UserDetailsService {
     public void deleteUser(final String username) {
         Objects.requireNonNull(username, "username cannot be null!");
 
-        userRepository.findUserByUsername(username)
-                .map(user -> {
-                    this.userRepository.delete(user);
-                    LOG.debug("User {} deleted.", username);
-                    return user;
-                })
+        var user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User with " + username + " not found!"));
+
+        this.userRepository.delete(user);
+        LOG.debug("User {} deleted.", username);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void checkLoginCredentials(LoginDto loginDto) {
         LOG.debug("validating credentials for {}", loginDto.username());
-        this.userRepository.findUserByUsername(loginDto.username())
-                .map(user -> {
-                    if (!this.passwordEncoder.matches(loginDto.password(), user.getPassword())) {
-                        throw new BadCredentialsException("Username or password is invalid!");
-                    }
-                    return user;
-                }).orElseThrow(
+        var user = this.userRepository.findUserByUsername(loginDto.username())
+                .orElseThrow(
                         () -> new BadCredentialsException("User with '%s' not found!".formatted(loginDto.username()))
                 );
+
+        if (!this.passwordEncoder.matches(loginDto.password(), user.getPassword())) {
+            throw new BadCredentialsException("Username or password is invalid!");
+        }
     }
 }

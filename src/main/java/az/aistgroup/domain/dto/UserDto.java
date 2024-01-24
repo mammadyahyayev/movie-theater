@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import static az.aistgroup.constants.ValidationConstant.PASSWORD_MAX_LENGTH;
 import static az.aistgroup.constants.ValidationConstant.PASSWORD_MIN_LENGTH;
@@ -37,6 +39,8 @@ public class UserDto implements Serializable {
     private String password;
 
     private BigDecimal balance;
+
+    private Set<String> authorities;
 
     public UserDto() {
     }
@@ -107,6 +111,14 @@ public class UserDto implements Serializable {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public Set<String> getAuthorities() {
+        return authorities;
+    }
+
+    public void setAuthorities(Set<String> authorities) {
+        this.authorities = authorities;
     }
 
     @Override

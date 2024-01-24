@@ -1,5 +1,6 @@
 package az.aistgroup.domain.entity;
 
+import az.aistgroup.util.Strings;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -31,11 +32,26 @@ public class User extends AbstractAuditingEntity<Long> {
 
     private BigDecimal balance;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_authorities",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "authority_id")
+    )
+    private Set<Authority> authorities = new HashSet<>();
+
     @OneToMany(
             fetch = FetchType.LAZY, mappedBy = "user",
             orphanRemoval = true, cascade = CascadeType.ALL
     )
     private Set<Ticket> tickets = new HashSet<>();
+
+    public User() {
+    }
+
+    public String getFullName() {
+        return this.firstName + " " + this.lastName + " " + this.fatherName;
+    }
 
     @Override
     public Long getId() {
@@ -103,18 +119,14 @@ public class User extends AbstractAuditingEntity<Long> {
         this.tickets = tickets;
     }
 
-    public void addTicket(Ticket ticket) {
-        if(ticket == null) return;
-
-        this.tickets.add(ticket);
-        ticket.setUser(this);
+    public Set<Authority> getAuthorities() {
+        return authorities;
     }
 
-    public void removeTicket(Ticket ticket) {
-        if(ticket == null) return;
+    public void addAuthority(Authority authority) {
+        if (authority == null || Strings.isNullOrEmpty(authority.getName())) return;
 
-        ticket.setUser(null);
-        this.tickets.remove(ticket);
+        this.authorities.add(authority);
     }
 
     @Override
