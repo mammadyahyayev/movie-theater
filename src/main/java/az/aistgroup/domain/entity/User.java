@@ -129,6 +129,18 @@ public class User extends AbstractAuditingEntity<Long> {
         this.authorities.add(authority);
     }
 
+    public void increaseBalance(BigDecimal amount) {
+        Objects.requireNonNull(amount, "amount can not be null!");
+
+        this.balance = this.balance.add(amount);
+    }
+
+    public void decreaseBalance(BigDecimal amount) {
+        Objects.requireNonNull(amount, "amount can not be null!");
+
+        this.balance = this.balance.subtract(amount);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

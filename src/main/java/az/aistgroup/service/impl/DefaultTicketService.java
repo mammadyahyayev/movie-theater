@@ -111,11 +111,11 @@ public class DefaultTicketService implements TicketService {
                     "Sorry! You don't have enough balance in your account to purchase ticket!");
         }
 
+        user.decreaseBalance(session.getPrice());
+        userRepository.save(user);
+
         session.decreaseLeftTickets();
         sessionRepository.save(session);
-
-        user.setBalance(user.getBalance().subtract(session.getPrice()));
-        userRepository.save(user);
 
         var ticket = new Ticket();
         ticket.setMovieSession(session);
@@ -128,16 +128,63 @@ public class DefaultTicketService implements TicketService {
 
     @Override
     @Transactional
-    public TicketDto updateTicket(final Long id, final TicketDto ticketDto) {
+    public TicketDto updateTicket(final Long id, final TicketRequestDto ticketRequestDto) {
         Objects.requireNonNull(id, "id can not be null!");
-        Objects.requireNonNull(ticketDto, "ticketDto can not be null!");
+        Objects.requireNonNull(ticketRequestDto, "ticketRequestDto can not be null!");
 
         Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket with " + id + " not found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Ticket", id));
+
+        var newSessionId = ticketRequestDto.getSessionId();
+        if (!ticket.getMovieSession().getId().equals(newSessionId)) {
+            var oldSession = ticket.getMovieSession();
+            oldSession.increaseLeftTickets();
+            sessionRepository.save(oldSession);
+
+            var newSession = sessionRepository.findById(newSessionId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Session", id));
+            newSession.decreaseLeftTickets();
+            sessionRepository.save(newSession);
+
+            ticket.setMovieSession(newSession);
+        }
+
+        var newSeatId = ticketRequestDto.getSeatId();
+        if (!ticket.getSeat().getId().equals(newSeatId)) {
+            var existingTicket = ticketRepository.findTicketBySeatInCurrentSession(newSeatId, newSessionId);
+            if (existingTicket.isPresent()) {
+                throw new SeatAlreadyBookedException(existingTicket.get().getSeat().getSeatNum());
+            }
+
+            var newSeat = seatRepository.findById(ticketRequestDto.getSeatId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Seat", newSeatId));
+
+            ticket.setSeat(newSeat);
+        }
+
+        var newUsername = ticketRequestDto.getUsername();
+        if (!ticket.getUser().getUsername().equals(newUsername)) {
+
+            var newUser = userRepository.findUserByUsername(newUsername)
+                    .orElseThrow(() -> new UsernameNotFoundException("User '" + newUsername + " not found!"));
+
+            var ticketPrice = ticket.getMovieSession().getPrice(); // new session price
+            if (newUser.getBalance().compareTo(ticketPrice) < 0) {
+                throw new InsufficientFundsException(
+                        "Sorry! You don't have enough balance in your account to purchase ticket!");
+            }
+            newUser.decreaseBalance(ticketPrice);
+            userRepository.save(newUser);
+
+            var oldUser = ticket.getUser();
+            oldUser.increaseBalance(ticketPrice);
+            userRepository.save(oldUser);
+
+            ticket.setUser(newUser);
+        }
 
         Ticket updatedTicket = ticketRepository.save(ticket);
-
-        return new TicketDto();
+        return new TicketDto(updatedTicket);
     }
 
     @Override
@@ -154,7 +201,7 @@ public class DefaultTicketService implements TicketService {
         }
 
         var user = ticket.getUser();
-        user.setBalance(user.getBalance().add(ticket.getMovieSession().getPrice()));
+        user.increaseBalance(ticket.getMovieSession().getPrice());
         userRepository.save(user);
 
         var session = ticket.getMovieSession();

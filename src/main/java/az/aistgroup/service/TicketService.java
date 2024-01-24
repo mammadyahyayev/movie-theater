@@ -12,7 +12,7 @@ public interface TicketService {
 
     TicketDto buyTicket(TicketRequestDto ticketDto);
 
-    TicketDto updateTicket(Long id, TicketDto ticketDto);
+    TicketDto updateTicket(Long id, TicketRequestDto ticketRequestDto);
 
     void refundTicket(Long ticketId);
 }

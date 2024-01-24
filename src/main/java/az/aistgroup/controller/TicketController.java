@@ -3,10 +3,12 @@ package az.aistgroup.controller;
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.domain.dto.TicketDto;
 import az.aistgroup.domain.dto.TicketRequestDto;
+import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +23,7 @@ public class TicketController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<List<TicketDto>> getAllTickets() {
         List<TicketDto> tickets = ticketService.getAllTickets();
         return new ResponseEntity<>(tickets, HttpStatus.OK);
@@ -46,8 +49,10 @@ public class TicketController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TicketDto> updateTicket(@PathVariable("id") Long id, @Valid @RequestBody TicketDto ticketDto) {
-        TicketDto ticket = ticketService.updateTicket(id, ticketDto);
+    @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
+    public ResponseEntity<TicketDto> updateTicket(
+            @PathVariable("id") Long id, @Valid @RequestBody TicketRequestDto ticketRequestDto) {
+        TicketDto ticket = ticketService.updateTicket(id, ticketRequestDto);
         return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 

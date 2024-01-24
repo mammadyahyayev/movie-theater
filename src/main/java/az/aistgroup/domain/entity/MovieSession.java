@@ -96,4 +96,12 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
 
         this.ticketsLeft--;
     }
+
+    public void increaseLeftTickets() {
+        if (this.hall.getCapacity() == this.ticketsLeft) {
+            throw new IllegalArgumentException("Can not increase left tickets because it exceeds hall capacity!");
+        }
+
+        this.ticketsLeft++;
+    }
 }
