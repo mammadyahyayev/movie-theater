@@ -2,7 +2,9 @@ package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.MovieDto;
 import az.aistgroup.domain.dto.OperationResponseDto;
+import az.aistgroup.exception.InvalidRequestException;
 import az.aistgroup.service.MovieService;
+import az.aistgroup.util.Strings;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,5 +50,15 @@ public class MovieController {
         movieService.deleteMovie(id);
         var response = new OperationResponseDto(true, "Movie with " + id + " deleted...");
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<MovieDto>> searchMovies(@RequestParam("name") String name) {
+        if (!Strings.hasText(name)) {
+            throw new InvalidRequestException("Movie name can not be empty!");
+        }
+
+        List<MovieDto> movies = movieService.searchMoviesByName(name);
+        return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 }

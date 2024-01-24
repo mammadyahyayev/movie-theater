@@ -2,6 +2,7 @@ package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.MovieDto;
 import az.aistgroup.domain.entity.Movie;
+import az.aistgroup.domain.mapper.MovieMapper;
 import az.aistgroup.exception.ResourceNotFoundException;
 import az.aistgroup.repository.MovieRepository;
 import az.aistgroup.service.MovieService;
@@ -29,7 +30,7 @@ public class DefaultMovieService implements MovieService {
     @Transactional(readOnly = true)
     public MovieDto getMovieById(final Long id) {
         return movieRepository.findById(id)
-                .map(movie -> new MovieDto(movie.getName(), movie.getGenre()))
+                .map(MovieMapper::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie with " + id + " not found!"));
     }
 
@@ -38,13 +39,10 @@ public class DefaultMovieService implements MovieService {
     public MovieDto addMovie(final MovieDto movieDto) {
         Objects.requireNonNull(movieDto, "movieDto can not be null!");
 
-        var movie = new Movie();
-        movie.setName(movieDto.name());
-        movie.setGenre(movieDto.genre());
+        var movie = MovieMapper.toEntity(movieDto);
         Movie newMovie = movieRepository.save(movie);
 
-        //TODO: Use mapper
-        return new MovieDto(newMovie.getName(), newMovie.getGenre());
+        return MovieMapper.toDto(newMovie);
     }
 
     @Override
@@ -56,12 +54,11 @@ public class DefaultMovieService implements MovieService {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie with " + id + " not found!"));
 
-        movie.setName(movieDto.name());
-        movie.setGenre(movieDto.genre());
+        movie.setName(movieDto.getName());
+        movie.setGenre(movieDto.getGenre());
 
         Movie updatedMovie = movieRepository.save(movie);
-
-        return new MovieDto(updatedMovie.getName(), updatedMovie.getGenre());
+        return MovieMapper.toDto(updatedMovie);
     }
 
     @Override
@@ -74,5 +71,10 @@ public class DefaultMovieService implements MovieService {
                         () -> {
                             throw new ResourceNotFoundException("Movie with " + id + " not found!");
                         });
+    }
+
+    @Override
+    public List<MovieDto> searchMoviesByName(String movieName) {
+        return movieRepository.findByNameIsContainingIgnoreCase(movieName);
     }
 }
