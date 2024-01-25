@@ -10,20 +10,22 @@ management:
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:movie_theater
+    url: jdbc:h2:file:./db/movie_theater;DB_CLOSE_DELAY=-1
     username: sa
-    password: password
+    password:
 
   jpa:
     open-in-view: false
     database: h2
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+    defer-datasource-initialization: false
+
   h2:
     console:
       enabled: true

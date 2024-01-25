@@ -1,0 +1,11 @@
+version: '3.1'
+
+services:
+  flyway:
+    image: flyway/flyway
+    container_name: flyway-aist
+    command: -url=jdbc:h2:file:./db/movie_theater -schemas=PUBLIC -user=sa migrate
+    stdin_open: true
+    volumes:
+      - ./db:/flyway/db
+      - ./src/main/resources/db/migration:/flyway/sql
