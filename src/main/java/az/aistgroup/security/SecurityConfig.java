@@ -1,5 +1,7 @@
 package az.aistgroup.security;
 
+import az.aistgroup.exception.AccessDeniedExceptionHandler;
+import az.aistgroup.exception.UnAuthorizedExceptionHandler;
 import az.aistgroup.security.jwt.TokenGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,6 +38,10 @@ public class SecurityConfig {
         http
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new UnAuthorizedExceptionHandler())
+                        .accessDeniedHandler(new AccessDeniedExceptionHandler())
+                )
                 .addFilterBefore(
                         new JwtFilter(tokenGenerator, securityProperties), UsernamePasswordAuthenticationFilter.class
                 )

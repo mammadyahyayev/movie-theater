@@ -6,7 +6,8 @@ public enum ErrorResponseCode {
     BAD_CREDENTIALS("bad.credentials"),
     INTERNAL_SERVER_ERROR("internal.server.error"),
     ACCESS_DENIED("access.denied"),
-    INVALID_REQUEST("invalid.request");
+    INVALID_REQUEST("invalid.request"),
+    UNAUTHORIZED("unauthorized.request");
 
     private final String code;
 

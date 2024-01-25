@@ -1,5 +1,7 @@
 package az.aistgroup.exception;
 
+import org.springframework.http.HttpStatus;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,28 +14,18 @@ public class ErrorResponse {
         timestamp = LocalDateTime.now();
     }
 
-    public static class Error {
-        private final String code;
-        private final String message;
-        private final String field;
+    public record Error(String code, String message, String field) {
+    }
 
-        public Error(String code, String message, String field) {
-            this.code = code;
-            this.message = message;
-            this.field = field;
-        }
+    public static ErrorResponse getDefaultErrorResponse(HttpStatus status, ErrorResponseCode response, String message) {
+        return getDefaultErrorResponse(status, response, message, null);
+    }
 
-        public String getCode() {
-            return code;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public String getField() {
-            return field;
-        }
+    public static ErrorResponse getDefaultErrorResponse(HttpStatus status, ErrorResponseCode response, String message, String field) {
+        var errorResponse = new ErrorResponse();
+        errorResponse.setStatus(status.value());
+        errorResponse.setErrors(List.of(new ErrorResponse.Error(response.getCode(), message, field)));
+        return errorResponse;
     }
 
     public int getStatus() {
