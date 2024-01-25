@@ -1,8 +1,6 @@
 package az.aistgroup.service.impl;
 
-import az.aistgroup.domain.dto.LoginDto;
-import az.aistgroup.domain.dto.UserDto;
-import az.aistgroup.domain.dto.UserViewDto;
+import az.aistgroup.domain.dto.*;
 import az.aistgroup.domain.entity.User;
 import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
@@ -27,6 +25,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static az.aistgroup.domain.entity.User.DEFAULT_USER_BALANCE;
+import static az.aistgroup.domain.entity.User.DEFAULT_USER_ROLE;
 
 @Service
 public class DefaultUserService implements UserService, UserDetailsService {
@@ -89,6 +90,37 @@ public class DefaultUserService implements UserService, UserDetailsService {
 
     @Override
     @Transactional
+    public UserDto registerUser(final RegisterDto registerDto) {
+        Objects.requireNonNull(registerDto, "registerDto can not be null!");
+
+        userRepository.findUserByUsername(registerDto.getUsername())
+                .ifPresent(u -> {
+                    throw new ResourceAlreadyExistException(
+                            "Username '%s' is already exist!".formatted(registerDto.getUsername())
+                    );
+                });
+
+        User user = new User();
+        user.setFirstName(registerDto.getFirstName());
+        user.setLastName(registerDto.getLastName());
+        user.setFatherName(registerDto.getFatherName());
+        user.setUsername(registerDto.getUsername().toLowerCase());
+        user.setBalance(new BigDecimal(DEFAULT_USER_BALANCE));
+
+        String encodedPassword = passwordEncoder.encode(registerDto.getPassword());
+        user.setPassword(encodedPassword);
+
+        authorityRepository.findById(DEFAULT_USER_ROLE)
+                .ifPresent(user::addAuthority);
+
+        userRepository.save(user);
+        LOG.debug("User registered {} on {}", user, LocalDateTime.now());
+
+        return new UserDto(user);
+    }
+
+    @Override
+    @Transactional
     public UserDto addUser(final UserDto userDto) {
         Objects.requireNonNull(userDto, "userDto can not be null!");
 
@@ -131,8 +163,25 @@ public class DefaultUserService implements UserService, UserDetailsService {
     }
 
     @Override
+    public UserDto updateUser(String username, UpdateUserRequestDto userDto) {
+        Objects.requireNonNull(userDto, "userDto can not be null!");
+
+        var user = userRepository.findUserByUsername(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User '" + username + "' not found!"));
+
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setFatherName(userDto.getFatherName());
+
+        userRepository.save(user);
+        LOG.debug("User updated {} on {}", user, LocalDateTime.now());
+        return new UserDto(user);
+    }
+
+    @Override
     @Transactional
-    public UserDto updateUser(String username, UserDto userDto) {
+    public UserDto updateUserByAdmin(String username, UserDto userDto) {
         Objects.requireNonNull(userDto, "userDto can not be null!");
 
         var user = userRepository.findUserByUsername(username)

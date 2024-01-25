@@ -1,8 +1,6 @@
 package az.aistgroup.service;
 
-import az.aistgroup.domain.dto.LoginDto;
-import az.aistgroup.domain.dto.UserDto;
-import az.aistgroup.domain.dto.UserViewDto;
+import az.aistgroup.domain.dto.*;
 
 import java.util.List;
 
@@ -11,9 +9,13 @@ public interface UserService {
 
     UserDto getUserByUsername(String username);
 
+    UserDto registerUser(RegisterDto registerDto);
+
     UserDto addUser(UserDto userDto);
 
-    UserDto updateUser(String username, UserDto userDto);
+    UserDto updateUser(String username, UpdateUserRequestDto userDto);
+
+    UserDto updateUserByAdmin(String username, UserDto userDto);
 
     void deleteUser(String username);
 

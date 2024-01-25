@@ -1,14 +1,14 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.OperationResponseDto;
+import az.aistgroup.domain.dto.UpdateUserRequestDto;
 import az.aistgroup.domain.dto.UserDto;
 import az.aistgroup.domain.dto.UserViewDto;
+import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.security.SecurityUtils;
 import az.aistgroup.service.UserService;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -52,11 +52,16 @@ public class UserController {
             @ApiResponse(responseCode = "200", description = "Return a user for given username.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = UserDto.class))}),
-            @ApiResponse(
-                    responseCode = "403",
+
+            @ApiResponse(responseCode = "404", description = "Returns given username isn't found.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "403",
                     description = "Given username and logged in user's username aren't matched",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDto.class))})
+                            schema = @Schema(implementation = UserDto.class))}),
+
     })
     @GetMapping("/{username}")
     public ResponseEntity<UserDto> getUserById(@PathVariable("username") String username) {
@@ -66,11 +71,20 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @Operation(summary = "Adds a new user.")
+    @Operation(summary = "Adds a new user. Only ADMIN can create a new user. Users must register to create account.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Returns a newly created user for given username.",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDto.class))})
+                            schema = @Schema(implementation = UserDto.class))}),
+
+            @ApiResponse(responseCode = "403",
+                    description = "Given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+
+            @ApiResponse(responseCode = "400", description = "Returns when validation for fields are failed.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
     })
     @PostMapping
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
@@ -79,20 +93,57 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Updates a user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns a newly updated user.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+
+            @ApiResponse(responseCode = "404", description = "Returns given username isn't found.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "403",
+                    description = "Returns when given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+
+            @ApiResponse(responseCode = "400", description = "Returns when validation for fields are failed.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+    })
     @PutMapping("/{username}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable("username") String username, @Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> updateUser(
+            @PathVariable("username") String username,
+            @Valid @RequestBody UpdateUserRequestDto userDto
+    ) {
         checkUserHasPermission(username);
 
         UserDto user = userService.updateUser(username, userDto);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    @Operation(summary = "Deletes a user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns a successful operation result.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OperationResponseDto.class))}),
+
+            @ApiResponse(responseCode = "404", description = "Returns given username isn't found.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "403",
+                    description = "Returns when given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+    })
     @DeleteMapping("/{username}")
     public ResponseEntity<OperationResponseDto> deleteUser(@PathVariable("username") String username) {
         checkUserHasPermission(username);
 
         userService.deleteUser(username);
-        var response = new OperationResponseDto(true, "User with " + username + " deleted...");
+        var response = new OperationResponseDto(true, "User '" + username + "' deleted...");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

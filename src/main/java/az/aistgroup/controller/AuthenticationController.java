@@ -1,9 +1,16 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.LoginDto;
+import az.aistgroup.domain.dto.RegisterDto;
 import az.aistgroup.domain.dto.UserDto;
+import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.jwt.TokenGenerator;
 import az.aistgroup.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -39,14 +46,31 @@ public class AuthenticationController {
         this.tokenGenerator = tokenGenerator;
     }
 
-    //TODO: Create RegisterDto, and create separate service method for registering
+    @Operation(summary = "Register a new user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns newly registered user.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(responseCode = "400", description = "Returns when validation for fields are failed.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
     @SecurityRequirements(value = {})
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody UserDto userDto) {
-        UserDto user = userService.addUser(userDto);
+    public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterDto registerDto) {
+        UserDto user = userService.registerUser(registerDto);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Login a new user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns access token and refresh token for user.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = JwtToken.class))}),
+            @ApiResponse(responseCode = "400", description = "Returns when validation for fields are failed.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
     @SecurityRequirements(value = {})
     @PostMapping("/login")
     public ResponseEntity<JwtToken> login(@Valid @RequestBody LoginDto loginDTO) {
@@ -67,6 +91,15 @@ public class AuthenticationController {
         return new ResponseEntity<>(new JwtToken(accessToken, refreshToken), HttpStatus.OK);
     }
 
+    @Operation(summary = "Get new access token by sending refresh token")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns access token and refresh token for user.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = JwtToken.class))}),
+            @ApiResponse(responseCode = "400", description = "Returns when refresh token is null or empty",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
     @PostMapping("/token/refresh")
     public ResponseEntity<JwtToken> getToken(@Valid @RequestBody RefreshTokenDto refreshTokenDto) {
         Authentication authentication = tokenGenerator.getAuthentication(refreshTokenDto.refreshToken());

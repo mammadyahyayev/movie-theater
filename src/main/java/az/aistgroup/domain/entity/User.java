@@ -1,5 +1,6 @@
 package az.aistgroup.domain.entity;
 
+import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.util.Strings;
 import jakarta.persistence.*;
 
@@ -11,6 +12,9 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class User extends AbstractAuditingEntity<Long> {
+    public static final String DEFAULT_USER_BALANCE = "100";
+    public static final String DEFAULT_USER_ROLE = AuthorityConstant.USER;
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
     @SequenceGenerator(name = "user_generator", sequenceName = "user_seq", allocationSize = 1)
