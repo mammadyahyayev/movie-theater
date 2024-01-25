@@ -9,7 +9,7 @@ import java.util.Set;
 @Table(name = "authorities")
 public class Authority {
     @Id
-    @Column(name = "authority_name")
+    @Column(name = "authority_name", length = 50)
     private String name;
 
     @ManyToMany(mappedBy = "authorities")

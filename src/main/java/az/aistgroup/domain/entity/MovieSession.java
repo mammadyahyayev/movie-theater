@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @Table(name = "movie_sessions")
 public class MovieSession extends AbstractAuditingEntity<Long> {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "session_generator")
+    @SequenceGenerator(name = "session_generator", sequenceName = "session_seq", allocationSize = 1)
     private Long id;
 
     private LocalDateTime date;

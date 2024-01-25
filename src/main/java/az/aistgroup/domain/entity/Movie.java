@@ -8,7 +8,8 @@ import jakarta.persistence.*;
 public class Movie extends AbstractAuditingEntity<Long> {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "movie_generator")
+    @SequenceGenerator(name = "movie_generator", sequenceName = "movie_seq", allocationSize = 1)
     private Long id;
 
     private String name;

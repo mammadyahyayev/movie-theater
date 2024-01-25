@@ -6,7 +6,8 @@ import jakarta.persistence.*;
 @Table(name = "tickets")
 public class Ticket extends AbstractAuditingEntity<Long> {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ticket_generator")
+    @SequenceGenerator(name = "ticket_generator", sequenceName = "ticket_seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

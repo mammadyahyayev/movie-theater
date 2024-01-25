@@ -9,7 +9,8 @@ import java.util.Set;
 @Table(name = "halls")
 public class Hall extends AbstractAuditingEntity<Long> {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hall_generator")
+    @SequenceGenerator(name = "hall_generator", sequenceName = "hall_seq", allocationSize = 1)
     private Long id;
 
     @Column(unique = true)

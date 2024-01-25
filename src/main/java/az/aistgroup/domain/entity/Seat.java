@@ -6,7 +6,8 @@ import jakarta.persistence.*;
 @Table(name = "seats")
 public class Seat extends AbstractAuditingEntity<Long> {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seat_generator")
+    @SequenceGenerator(name = "seat_generator", sequenceName = "seat_seq", allocationSize = 1)
     private Long id;
 
     private int seatNum;

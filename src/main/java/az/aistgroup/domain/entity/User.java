@@ -12,7 +12,8 @@ import java.util.Set;
 @Table(name = "users")
 public class User extends AbstractAuditingEntity<Long> {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
+    @SequenceGenerator(name = "user_generator", sequenceName = "user_seq", allocationSize = 1)
     private Long id;
 
     @Column(length = 50)
