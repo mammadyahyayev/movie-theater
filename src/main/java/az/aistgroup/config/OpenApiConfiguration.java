@@ -2,6 +2,7 @@ package az.aistgroup.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,11 @@ public class OpenApiConfiguration {
     public OpenAPI configureOpenApiSecurity() {
         final String securitySchemeName = "bearerAuth";
         return new OpenAPI()
+                .info(new Info()
+                        .title("Movie Theater REST API")
+                        .version("V1")
+                        .description("Movie Theater REST API documentation.")
+                )
                 .addSecurityItem(new SecurityRequirement()
                         .addList(securitySchemeName))
                 .components(new Components()
