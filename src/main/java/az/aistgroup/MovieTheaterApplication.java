@@ -1,7 +1,6 @@
 package az.aistgroup;
 
 import az.aistgroup.domain.dto.UserDto;
-import az.aistgroup.repository.UserRepository;
 import az.aistgroup.security.AppSecurityProperties;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.service.UserService;
@@ -17,11 +16,9 @@ import java.util.Set;
 @EnableConfigurationProperties({AppSecurityProperties.class})
 public class MovieTheaterApplication implements CommandLineRunner {
     private final UserService userService;
-    private final UserRepository userRepository;
 
-    public MovieTheaterApplication(UserService userService, UserRepository userRepository) {
+    public MovieTheaterApplication(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
     }
 
     public static void main(String[] args) {

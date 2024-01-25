@@ -17,6 +17,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
@@ -24,13 +26,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final TokenGenerator tokenGenerator;
     private final AppSecurityProperties securityProperties;
+    private final HandlerExceptionResolver handlerExceptionResolver;
 
     public SecurityConfig(
             TokenGenerator tokenGenerator,
-            AppSecurityProperties securityProperties
+            AppSecurityProperties securityProperties, HandlerExceptionResolver handlerExceptionResolver
     ) {
         this.tokenGenerator = tokenGenerator;
         this.securityProperties = securityProperties;
+        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Bean
@@ -39,8 +43,8 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(new UnAuthorizedExceptionHandler())
-                        .accessDeniedHandler(new AccessDeniedExceptionHandler())
+                        .authenticationEntryPoint(new UnAuthorizedExceptionHandler(handlerExceptionResolver))
+                        .accessDeniedHandler(new AccessDeniedExceptionHandler(handlerExceptionResolver))
                 )
                 .addFilterBefore(
                         new JwtFilter(tokenGenerator, securityProperties), UsernamePasswordAuthenticationFilter.class
