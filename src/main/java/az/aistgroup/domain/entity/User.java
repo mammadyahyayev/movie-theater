@@ -131,6 +131,7 @@ public class User extends AbstractAuditingEntity<Long> {
     public void addAuthority(Authority authority) {
         if (authority == null || Strings.isNullOrEmpty(authority.getName())) return;
 
+        authority.getUsers().add(this);
         this.authorities.add(authority);
     }
 

@@ -89,6 +89,16 @@ public class DefaultUserService implements UserService, UserDetailsService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public boolean doesUserExist(String username) {
+        if (Strings.isNullOrEmpty(username)) {
+            throw new IllegalArgumentException("username can not be null or empty!");
+        }
+
+        return userRepository.findUserByUsername(username).isPresent();
+    }
+
+    @Override
     @Transactional
     public UserDto registerUser(final RegisterDto registerDto) {
         Objects.requireNonNull(registerDto, "registerDto can not be null!");
