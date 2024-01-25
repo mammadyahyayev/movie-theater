@@ -54,7 +54,7 @@ public class MovieController {
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<OperationResponseDto> deleteMovie(@PathVariable("id") Long id) {
         movieService.deleteMovie(id);
-        var response = new OperationResponseDto(true, "Movie with " + id + " deleted...");
+        var response = new OperationResponseDto(true, "Movie with id:" + id + " deleted...");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

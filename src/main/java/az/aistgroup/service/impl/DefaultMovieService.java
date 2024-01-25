@@ -76,6 +76,9 @@ public class DefaultMovieService implements MovieService {
 
     @Override
     public List<MovieDto> searchMoviesByName(String movieName) {
-        return movieRepository.findByNameIsContainingIgnoreCase(movieName);
+        List<Movie> movies = movieRepository.findByNameIsContainingIgnoreCase(movieName);
+        return movies.stream()
+                .map(MovieMapper::toDto)
+                .toList();
     }
 }

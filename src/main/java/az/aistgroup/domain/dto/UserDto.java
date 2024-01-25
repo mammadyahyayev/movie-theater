@@ -4,7 +4,6 @@ import az.aistgroup.domain.entity.User;
 import az.aistgroup.util.Strings;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.io.Serializable;
@@ -16,24 +15,19 @@ import static az.aistgroup.constants.ValidationConstant.PASSWORD_MAX_LENGTH;
 import static az.aistgroup.constants.ValidationConstant.PASSWORD_MIN_LENGTH;
 
 public class UserDto implements Serializable {
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "{field.notBlank}")
     private String firstName;
 
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "{field.notBlank}")
     private String lastName;
 
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "{field.notBlank}")
     private String fatherName;
 
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "{field.notBlank}")
     private String username;
 
-    @NotBlank
-    @NotNull
+    @NotBlank(message = "{field.notBlank}")
     @Size(min = PASSWORD_MIN_LENGTH, max = PASSWORD_MAX_LENGTH)
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
@@ -51,6 +45,7 @@ public class UserDto implements Serializable {
         setFatherName(user.getFatherName());
         setUsername(user.getUsername());
         setBalance(user.getBalance());
+        //TODO: Consider assigning authorities in here because UserDto prints authorities empty array
     }
 
     public String getFirstName() {

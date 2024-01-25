@@ -14,5 +14,5 @@ public interface MovieRepository extends CrudRepository<Movie, Long> {
     @Query("select m from Movie m")
     List<MovieViewDto> findAllForMovieView();
 
-    List<MovieDto> findByNameIsContainingIgnoreCase(String name);
+    List<Movie> findByNameIsContainingIgnoreCase(String name);
 }
