@@ -4,7 +4,9 @@ import az.aistgroup.domain.dto.MovieSessionDto;
 import az.aistgroup.domain.dto.MovieSessionViewDto;
 import az.aistgroup.domain.entity.Hall;
 import az.aistgroup.domain.entity.MovieSession;
+import az.aistgroup.domain.enumeration.MovieSessionTime;
 import az.aistgroup.domain.mapper.MovieSessionMapper;
+import az.aistgroup.exception.CapacityExceedException;
 import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
 import az.aistgroup.repository.HallRepository;
@@ -14,7 +16,8 @@ import az.aistgroup.service.MovieSessionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
@@ -44,14 +47,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
     @Transactional(readOnly = true)
     public MovieSessionDto getSessionById(final Long id) {
         return movieSessionRepository.findById(id)
-                .map(session -> {
-                    var sessionDto = new MovieSessionDto();
-                    sessionDto.setDate(session.getDate());
-                    sessionDto.setSessionTime(session.getSessionTime());
-                    sessionDto.setTicketsLeft(session.getTicketsLeft());
-                    sessionDto.setPrice(session.getPrice());
-                    return sessionDto;
-                })
+                .map(MovieSessionMapper::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Session", id));
     }
 
@@ -67,8 +63,17 @@ public class DefaultMovieSessionService implements MovieSessionService {
         movieSession.setMovie(movie);
 
         // checks whether there is active movie session for the hall at the given time
-        var hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate());
+        var hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate(), sessionDto.getSessionTime());
         movieSession.setHall(hall);
+
+        if (sessionDto.getTicketsLeft() == 0) {
+            movieSession.setTicketsLeft(hall.getCapacity());
+        } else if (sessionDto.getTicketsLeft() > hall.getCapacity()) {
+            String message = MessageFormat
+                    .format("Number of tickets can not be more than capacity ({0}) of {1}",
+                            hall.getCapacity(), hall.getName());
+            throw new CapacityExceedException(message);
+        }
 
         MovieSession newSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(newSession);
@@ -93,10 +98,19 @@ public class DefaultMovieSessionService implements MovieSessionService {
         }
 
         // update Hall
-        if (movieSession.getHall() != null && !movieSession.getHall().getId().equals(sessionDto.getHallId())) {
-            var hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate());
+        Hall hall = movieSession.getHall();
+        if (movieSession.getHall() != null && !hall.getId().equals(sessionDto.getHallId())) {
+            hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate(), sessionDto.getSessionTime());
             movieSession.setHall(hall);
         }
+
+        if (hall != null && sessionDto.getTicketsLeft() > hall.getCapacity()) {
+            String message = MessageFormat
+                    .format("Number of tickets can not be more than capacity({0}) of {1}",
+                            hall.getCapacity(), hall.getName());
+            throw new CapacityExceedException(message);
+        }
+
 
         var updatedSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(updatedSession);
@@ -126,9 +140,9 @@ public class DefaultMovieSessionService implements MovieSessionService {
      * @throws ResourceNotFoundException     will be thrown when there is no {@link Hall}
      *                                       for given {@code hallId}.
      */
-    private Hall getEmptyHallBySession(final Long hallId, final LocalDateTime sessionDate) {
-        movieSessionRepository.findActiveSessionForHall(hallId, sessionDate)
-                .ifPresent((session) -> {
+    private Hall getEmptyHallBySession(final Long hallId, final LocalDate sessionDate, final MovieSessionTime session) {
+        movieSessionRepository.findActiveSessionForHall(hallId, sessionDate, session)
+                .ifPresent((ms) -> {
                     throw new ResourceAlreadyExistException("There is a session for hall id: " + hallId);
                 });
 

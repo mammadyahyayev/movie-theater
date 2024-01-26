@@ -17,12 +17,11 @@ public final class MovieSessionMapper {
         return movieSession;
     }
 
-    public static MovieSession toEntityInPlace(MovieSessionDto sessionDto, MovieSession movieSession) {
+    public static void toEntityInPlace(MovieSessionDto sessionDto, MovieSession movieSession) {
         movieSession.setDate(sessionDto.getDate());
         movieSession.setSessionTime(sessionDto.getSessionTime());
         movieSession.setPrice(sessionDto.getPrice());
         movieSession.setTicketsLeft(sessionDto.getTicketsLeft());
-        return movieSession;
     }
 
     public static MovieSessionDto toDto(MovieSession movieSession) {
@@ -31,6 +30,8 @@ public final class MovieSessionMapper {
         movieSessionDto.setSessionTime(movieSession.getSessionTime());
         movieSessionDto.setPrice(movieSession.getPrice());
         movieSessionDto.setTicketsLeft(movieSession.getTicketsLeft());
+        movieSessionDto.setMovieId(movieSession.getMovie().getId());
+        movieSessionDto.setHallId(movieSession.getHall().getId());
         return movieSessionDto;
     }
 }

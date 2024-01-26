@@ -55,7 +55,7 @@ public class MovieSessionController {
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<OperationResponseDto> deleteMovieSession(@PathVariable("id") Long id) {
         movieSessionService.deleteSession(id);
-        var response = new OperationResponseDto(true, "Session with " + id + " deleted...");
+        var response = new OperationResponseDto(true, "Session with id: " + id + " deleted...");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

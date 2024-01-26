@@ -13,6 +13,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -195,7 +196,7 @@ public class DefaultTicketService implements TicketService {
         var ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket", ticketId));
 
-        var currentDateTime = LocalDateTime.now();
+        var currentDateTime = LocalDate.now();
         if (ticket.getMovieSession().getDate().isAfter(currentDateTime)) {
             throw new TicketExpiredException(ticketId);
         }

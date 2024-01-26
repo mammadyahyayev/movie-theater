@@ -3,10 +3,10 @@ package az.aistgroup.domain.dto;
 import az.aistgroup.domain.enumeration.MovieSessionTime;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public interface MovieSessionViewDto {
-    LocalDateTime getDate();
+    LocalDate getDate();
 
     MovieSessionTime getSessionTime();
 

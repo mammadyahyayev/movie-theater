@@ -7,7 +7,8 @@ public enum ErrorResponseCode {
     INTERNAL_SERVER_ERROR("internal.server.error"),
     ACCESS_DENIED("access.denied"),
     INVALID_REQUEST("invalid.request"),
-    UNAUTHORIZED("unauthorized.request");
+    UNAUTHORIZED("unauthorized.request"),
+    CAPACITY_EXCEEDED("capacity.exceeded");
 
     private final String code;
 

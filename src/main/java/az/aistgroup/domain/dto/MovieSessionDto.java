@@ -1,16 +1,20 @@
 package az.aistgroup.domain.dto;
 
 import az.aistgroup.domain.enumeration.MovieSessionTime;
+import az.aistgroup.validation.CurrentAndFutureDate;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class MovieSessionDto {
     @NotNull
-    private LocalDateTime date;
+    @CurrentAndFutureDate
+    private LocalDate date;
 
     @NotNull
     private MovieSessionTime sessionTime;
@@ -22,19 +26,21 @@ public class MovieSessionDto {
     private int ticketsLeft;
 
     @Positive
+    @NotNull
     private Long movieId;
 
     @Positive
+    @NotNull
     private Long hallId;
 
     public MovieSessionDto() {
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 

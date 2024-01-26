@@ -5,6 +5,7 @@ import az.aistgroup.exception.NoTicketsAvailableException;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,7 +16,7 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
     @SequenceGenerator(name = "session_generator", sequenceName = "session_seq", allocationSize = 1)
     private Long id;
 
-    private LocalDateTime date;
+    private LocalDate date;
 
     @Enumerated(EnumType.STRING)
     private MovieSessionTime sessionTime;
@@ -42,11 +43,11 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
         this.id = id;
     }
 
-    public LocalDateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
