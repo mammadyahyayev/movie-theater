@@ -11,7 +11,8 @@ public enum ErrorResponseCode {
     CAPACITY_EXCEEDED("capacity.exceeded"),
     SEAT_BOOKED("seat.booked"),
     INSUFFICIENT_FUNDS("insufficient.funds"),
-    NO_TICKETS_AVAILABLE("zero.tickets.left");
+    NO_TICKETS_AVAILABLE("zero.tickets.left"),
+    TICKET_EXPIRED("ticket.expired");
 
     private final String code;
 

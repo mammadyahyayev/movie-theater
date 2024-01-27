@@ -101,6 +101,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(TicketExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleTicketExpiredException(TicketExpiredException e, HttpServletRequest req) {
+        var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, TICKET_EXPIRED, e.getMessage(), null);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.UNAUTHORIZED, BAD_CREDENTIALS, e.getMessage(), null);
