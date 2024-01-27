@@ -3,7 +3,6 @@ package az.aistgroup.controller;
 import az.aistgroup.domain.dto.*;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.AuthorityConstant;
-import az.aistgroup.security.SecurityUtils;
 import az.aistgroup.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,11 +12,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static az.aistgroup.security.SecurityUtils.checkUserHasPermission;
 
 /**
  * The controller is used to manage users.
@@ -61,7 +61,7 @@ public class UserController {
 
     })
     @GetMapping("/{username}")
-    public ResponseEntity<UserDto> getUserById(@PathVariable("username") String username) {
+    public ResponseEntity<UserDto> getUserByUsername(@PathVariable("username") String username) {
         checkUserHasPermission(username);
 
         UserDto user = userService.getUserByUsername(username);
@@ -175,11 +175,5 @@ public class UserController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    private void checkUserHasPermission(String username) {
-        if (SecurityUtils.isSameLoggedInUser(username)) {
-            return;
-        }
 
-        throw new AccessDeniedException("You don't have permission to access the resource!");
-    }
 }

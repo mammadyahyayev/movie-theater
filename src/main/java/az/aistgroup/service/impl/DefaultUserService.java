@@ -134,6 +134,10 @@ public class DefaultUserService implements UserService, UserDetailsService {
     public UserDto addUser(final UserDto userDto) {
         Objects.requireNonNull(userDto, "userDto can not be null!");
 
+        if (!Strings.hasText(userDto.getUsername())) {
+            throw new IllegalArgumentException("Username can not be null or empty!");
+        }
+
         userRepository.findUserByUsername(userDto.getUsername())
                 .ifPresent(u -> {
                     throw new ResourceAlreadyExistException(

@@ -1,0 +1,42 @@
+server:
+  port: 9998
+
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:movie_theater_test;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  jpa:
+    open-in-view: false
+    database: h2
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    defer-datasource-initialization: false
+
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
+app:
+  security:
+    token-properties:
+      base64-secret: 69fac438762f524ecb7adb18eb507cdb730164eaec3ad1684a9b6fb47e673ebf45f175deeaac63c09b33bbe97feef40c46fa75e785210a7bc1990331c7232b1f
+      access-token-validity: 86400 # 24 hours
+      refresh-token-validity: 2592000 # 30 days
+      authorization-header-text: "Authorization"
+      token-prefix: "Bearer "
+
+logging:
+  level:
+    az.aistgroup: debug
+    org.springframework.security: debug
+    org.hibernate.sql: trace
+
