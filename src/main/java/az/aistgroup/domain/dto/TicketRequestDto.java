@@ -13,7 +13,6 @@ public final class TicketRequestDto {
     @NotNull
     private Long seatId;
 
-    @Positive
     @NotNull
     private String username;
 

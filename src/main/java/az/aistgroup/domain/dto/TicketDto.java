@@ -15,7 +15,7 @@ public class TicketDto {
         this.movie = ticket.getMovieSession().getMovie().getName();
         this.session = ticket.getMovieSession().getDate() + " " + ticket.getMovieSession().getSessionTime();
         this.ticketHolder = ticket.getUser().getFullName();
-        this.seat = ticket.getSeat().getHall() + " " + ticket.getSeat().getSeatNum();
+        this.seat = ticket.getSeat().getHall().getName() + " Seat: " + ticket.getSeat().getSeatNum();
     }
 
     public String getMovie() {

@@ -8,7 +8,10 @@ public enum ErrorResponseCode {
     ACCESS_DENIED("access.denied"),
     INVALID_REQUEST("invalid.request"),
     UNAUTHORIZED("unauthorized.request"),
-    CAPACITY_EXCEEDED("capacity.exceeded");
+    CAPACITY_EXCEEDED("capacity.exceeded"),
+    SEAT_BOOKED("seat.booked"),
+    INSUFFICIENT_FUNDS("insufficient.funds"),
+    NO_TICKETS_AVAILABLE("zero.tickets.left");
 
     private final String code;
 
