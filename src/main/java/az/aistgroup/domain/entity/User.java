@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.StringJoiner;
 
 @Entity
 @Table(name = "users")
@@ -160,5 +161,16 @@ public class User extends AbstractAuditingEntity<Long> {
     @Override
     public int hashCode() {
         return username != null ? username.hashCode() : 0;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", User.class.getSimpleName() + "[", "]")
+                .add("firstName='" + firstName + "'")
+                .add("lastName='" + lastName + "'")
+                .add("fatherName='" + fatherName + "'")
+                .add("username='" + username + "'")
+                .add("balance=" + balance)
+                .toString();
     }
 }

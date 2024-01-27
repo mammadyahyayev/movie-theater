@@ -100,7 +100,7 @@ public class DefaultUserService implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public UserDto registerUser(final RegisterDto registerDto) {
+    public UserView registerUser(final RegisterDto registerDto) {
         Objects.requireNonNull(registerDto, "registerDto can not be null!");
 
         userRepository.findUserByUsername(registerDto.getUsername())
@@ -126,7 +126,7 @@ public class DefaultUserService implements UserService, UserDetailsService {
         userRepository.save(user);
         LOG.debug("User registered {} on {}", user, LocalDateTime.now());
 
-        return new UserDto(user);
+        return new UserView(user);
     }
 
     @Override
@@ -141,7 +141,7 @@ public class DefaultUserService implements UserService, UserDetailsService {
                     );
                 });
 
-        User user = new User();
+        var user = new User();
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setFatherName(userDto.getFatherName());

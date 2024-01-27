@@ -3,6 +3,7 @@ package az.aistgroup.controller;
 import az.aistgroup.domain.dto.LoginDto;
 import az.aistgroup.domain.dto.RegisterDto;
 import az.aistgroup.domain.dto.UserDto;
+import az.aistgroup.domain.dto.UserView;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.jwt.TokenGenerator;
 import az.aistgroup.service.UserService;
@@ -27,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+
 @RestController
 @RequestMapping("/api/v1/auth/")
 public class AuthenticationController {
@@ -49,7 +52,7 @@ public class AuthenticationController {
     @Operation(summary = "Register a new user")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Returns newly registered user.",
-                    content = {@Content(mediaType = "application/json",
+                    content = {@Content(mediaType = "application/hal+json",
                             schema = @Schema(implementation = UserDto.class))}),
             @ApiResponse(responseCode = "400", description = "Returns when validation for fields are failed.",
                     content = {@Content(mediaType = "application/json",
@@ -57,8 +60,10 @@ public class AuthenticationController {
     })
     @SecurityRequirements(value = {})
     @PostMapping("/register")
-    public ResponseEntity<UserDto> register(@Valid @RequestBody RegisterDto registerDto) {
-        UserDto user = userService.registerUser(registerDto);
+    public ResponseEntity<UserView> register(@Valid @RequestBody RegisterDto registerDto) {
+        UserView user = userService.registerUser(registerDto);
+        user.add(linkTo(AuthenticationController.class).slash("/login").withRel("login"));
+        user.add(linkTo(UserController.class).slash("/balance/top-up").withRel("topUpBalance"));
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 

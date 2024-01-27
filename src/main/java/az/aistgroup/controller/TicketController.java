@@ -1,9 +1,6 @@
 package az.aistgroup.controller;
 
-import az.aistgroup.domain.dto.OperationResponseDto;
-import az.aistgroup.domain.dto.TicketDto;
-import az.aistgroup.domain.dto.TicketRefundDto;
-import az.aistgroup.domain.dto.TicketRequestDto;
+import az.aistgroup.domain.dto.*;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.security.SecurityUtils;
 import az.aistgroup.service.TicketService;
@@ -15,6 +12,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping("/api/v1/tickets")
@@ -39,10 +39,12 @@ public class TicketController {
     }
 
     @PostMapping("/buy")
-    public ResponseEntity<TicketDto> buyTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
+    public ResponseEntity<TicketView> buyTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
         checkUserHasPermission(ticketRequestDto.getUsername());
 
-        TicketDto ticket = ticketService.buyTicket(ticketRequestDto);
+        TicketView ticket = ticketService.buyTicket(ticketRequestDto);
+        ticket.add(linkTo(methodOn(TicketController.class).getTicketById(ticket.getId())).withSelfRel());
+        ticket.add(linkTo(TicketController.class).slash("/refund").withRel("refund"));
         return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 

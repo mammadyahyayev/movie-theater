@@ -3,6 +3,7 @@ package az.aistgroup.service.impl;
 import az.aistgroup.domain.dto.TicketDto;
 import az.aistgroup.domain.dto.TicketRefundDto;
 import az.aistgroup.domain.dto.TicketRequestDto;
+import az.aistgroup.domain.dto.TicketView;
 import az.aistgroup.domain.entity.MovieSession;
 import az.aistgroup.domain.entity.Seat;
 import az.aistgroup.domain.entity.Ticket;
@@ -83,7 +84,7 @@ public class DefaultTicketService implements TicketService {
 
     @Override
     @Transactional
-    public TicketDto buyTicket(final TicketRequestDto ticketRequestDto) {
+    public TicketView buyTicket(final TicketRequestDto ticketRequestDto) {
         Objects.requireNonNull(ticketRequestDto, "ticketRequestDto can not be null!");
 
         // check there are enough tickets to buy
@@ -127,7 +128,7 @@ public class DefaultTicketService implements TicketService {
         ticket.setUser(user);
 
         Ticket newTicket = ticketRepository.save(ticket);
-        return new TicketDto(newTicket);
+        return new TicketView(newTicket);
     }
 
     @Override

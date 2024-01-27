@@ -11,7 +11,7 @@ public interface UserService {
 
     boolean doesUserExist(String username);
 
-    UserDto registerUser(RegisterDto registerDto);
+    UserView registerUser(RegisterDto registerDto);
 
     UserDto addUser(UserDto userDto);
 
