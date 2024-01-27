@@ -2,37 +2,36 @@ package az.aistgroup.domain.dto;
 
 import az.aistgroup.domain.enumeration.MovieSessionTime;
 import az.aistgroup.validation.CurrentAndFutureDate;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class MovieSessionDto {
-    @NotNull
-    @CurrentAndFutureDate
+    @NotNull(message = "{field.notNull}")
+    @CurrentAndFutureDate(message = "date can not be in the past")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
 
-    @NotNull
+    @NotNull(message = "{field.notNull}")
     private MovieSessionTime sessionTime;
 
-    @NotNull
+    @NotNull(message = "{field.notNull}")
+    @Positive(message = "{field.positive}")
     private BigDecimal price;
 
-    @PositiveOrZero
+    @PositiveOrZero(message = "ticketsLeft can not be less than 0")
     private int ticketsLeft;
 
-    @Positive
-    @NotNull
+    @NotNull(message = "{field.notNull}")
+    @Positive(message = "{field.positive}")
     private Long movieId;
 
-    @Positive
-    @NotNull
+    @NotNull(message = "{field.notNull}")
+    @Positive(message = "{field.positive}")
     private Long hallId;
 
     public MovieSessionDto() {

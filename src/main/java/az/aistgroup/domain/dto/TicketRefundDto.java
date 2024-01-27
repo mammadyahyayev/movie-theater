@@ -1,14 +1,15 @@
 package az.aistgroup.domain.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public class TicketRefundDto {
-    @Positive
-    @NotNull
+    @NotNull(message = "{field.notNull}")
+    @Positive(message = "{field.positive}")
     private Long ticketId;
 
-    @NotNull
+    @NotBlank(message = "{field.notBlank}")
     private String username;
 
     public TicketRefundDto() {}

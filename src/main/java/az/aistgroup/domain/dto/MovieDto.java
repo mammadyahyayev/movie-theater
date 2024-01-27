@@ -5,11 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class MovieDto {
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "{field.notBlank}")
     private String name;
 
-    @NotNull
+    @NotNull(message = "{field.notNull}")
     private MovieGenre genre;
 
     public MovieDto() {

@@ -2,6 +2,7 @@ package az.aistgroup.domain.dto;
 
 import az.aistgroup.domain.entity.Ticket;
 
+//TODO: Maybe change this to TicketView (and also consider removing Dto suffix from Views)
 public class TicketDto {
     private String movie;
     private String session;

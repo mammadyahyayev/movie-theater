@@ -6,18 +6,19 @@ import jakarta.validation.constraints.Positive;
 
 public final class TicketRequestDto {
 
-    @Positive
-    @NotNull
+    @NotNull(message = "{field.notNull}")
+    @Positive(message = "{field.positive}")
     private Long sessionId;
 
-    @Positive
-    @NotNull
+    @NotNull(message = "{field.notNull}")
+    @Positive(message = "{field.positive}")
     private Long seatId;
 
-    @NotBlank
+    @NotBlank(message = "{field.notBlank}")
     private String username;
 
-    public TicketRequestDto() {}
+    public TicketRequestDto() {
+    }
 
     public Long getSessionId() {
         return sessionId;

@@ -13,7 +13,7 @@ public class TopUpBalanceDto {
     private String username;
 
     @NotNull(message = "{field.notNull}")
-    @Positive
+    @Positive(message = "{field.positive}")
     @Digits(integer = 10, fraction = 2, message = "Amount format must be: e.g 34.75")
     private BigDecimal amount;
 

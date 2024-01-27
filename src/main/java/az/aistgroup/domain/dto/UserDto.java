@@ -3,8 +3,7 @@ package az.aistgroup.domain.dto;
 import az.aistgroup.domain.entity.User;
 import az.aistgroup.util.Strings;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -32,6 +31,9 @@ public class UserDto implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @NotNull(message = "{field.notNull}")
+    @Positive(message = "{field.positive}")
+    @Digits(integer = 10, fraction = 2, message = "Amount format must be: e.g 34.75")
     private BigDecimal balance;
 
     private Set<String> authorities = new HashSet<>();
