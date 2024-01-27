@@ -10,7 +10,7 @@ import java.util.List;
 public interface TicketService {
     List<TicketDto> getAllTickets();
 
-    TicketDto getTicketById(Long id);
+    TicketDto getTicketById(Long id, String username);
 
     TicketView buyTicket(TicketRequestDto ticketDto);
 

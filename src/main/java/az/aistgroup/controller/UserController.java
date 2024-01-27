@@ -57,7 +57,7 @@ public class UserController {
             @ApiResponse(responseCode = "403",
                     description = "Given username and logged in user's username aren't matched",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDto.class))}),
+                            schema = @Schema(implementation = ErrorResponse.class))}),
 
     })
     @GetMapping("/{username}")

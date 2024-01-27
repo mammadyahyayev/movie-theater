@@ -1,8 +1,14 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.*;
+import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.service.TicketService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +30,12 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
+    @Operation(summary = "Fetches all tickets. Only ADMIN can get all available tickets.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns all available tickets.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TicketDto.class))})
+    })
     @GetMapping
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<List<TicketDto>> getAllTickets() {
@@ -31,22 +43,95 @@ public class TicketController {
         return new ResponseEntity<>(tickets, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<TicketDto> getTicketById(@PathVariable("id") Long id) {
-        TicketDto ticket = ticketService.getTicketById(id);
+    @Operation(summary = "Fetch a ticket by its id.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Return a ticket for given id.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TicketDto.class))}),
+
+            @ApiResponse(responseCode = "404", description = "Returns when ticket isn't found with given id.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "403",
+                    description = "Given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "400",
+                    description = "Returns when ticket owner's username is not the same as given username",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @GetMapping("/{id}/user/{username}")
+    public ResponseEntity<TicketDto> getTicketById(@PathVariable("id") Long id, @PathVariable("username") String username) {
+        checkUserHasPermission(username);
+
+        TicketDto ticket = ticketService.getTicketById(id, username);
         return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 
+    @Operation(summary = "Buys a ticket.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Return a bought ticket.",
+                    content = {@Content(mediaType = "application/hal+json",
+                            schema = @Schema(implementation = TicketView.class))}),
+
+            @ApiResponse(responseCode = "404", description = "Returns when session or seat isn't found.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "403",
+                    description = "Given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "400",
+                    description = "Returns when session is closed or there are no tickets available to buy",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "400",
+                    description = "Returns insufficient.funds when there is not enough money in user's balance to buy.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
     @PostMapping("/buy")
     public ResponseEntity<TicketView> buyTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
-        checkUserHasPermission(ticketRequestDto.getUsername());
+        String username = ticketRequestDto.getUsername();
+        checkUserHasPermission(username);
 
         TicketView ticket = ticketService.buyTicket(ticketRequestDto);
-        ticket.add(linkTo(methodOn(TicketController.class).getTicketById(ticket.getId())).withSelfRel());
+        ticket.add(linkTo(methodOn(TicketController.class).getTicketById(ticket.getId(), username)).withSelfRel());
         ticket.add(linkTo(TicketController.class).slash("/refund").withRel("refund"));
         return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 
+    @Operation(summary = "Refunds a ticket.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns operation result..",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OperationResponseDto.class))}),
+
+            @ApiResponse(responseCode = "404", description = "Returns resource.not.found when ticket isn't found with given id.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "403",
+                    description = "Returns access.denied when given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "400",
+                    description = "Returns access.denied when ticket owner's username is not the same as given username",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "400",
+                    description = "Returns ticket.expired when session is closed or there is less than an hour left for session to close.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
     @PostMapping("/refund")
     public ResponseEntity<OperationResponseDto> refundTicket(@Valid @RequestBody TicketRefundDto ticketRefundDto) {
         checkUserHasPermission(ticketRefundDto.getUsername());
@@ -57,6 +142,21 @@ public class TicketController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Operation(summary = "Update ticket by id. Only ADMIN can get all available tickets.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns updated ticket.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TicketDto.class))}),
+
+            @ApiResponse(responseCode = "404", description = "Returns resource.not.found when ticket isn't found with given id.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "400",
+                    description = "Returns insufficient.funds when new owner's balance isn't enough to change owner of the ticket..",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
     public ResponseEntity<TicketDto> updateTicket(
