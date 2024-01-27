@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -74,6 +74,9 @@ public class DefaultMovieSessionService implements MovieSessionService {
                             hall.getCapacity(), hall.getName());
             throw new CapacityExceedException(message);
         }
+        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
+        LocalDateTime localDateTime = sessionDto.getDate().withHour(hourOfDay);
+        movieSession.setDate(localDateTime);
 
         MovieSession newSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(newSession);
@@ -140,7 +143,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
      * @throws ResourceNotFoundException     will be thrown when there is no {@link Hall}
      *                                       for given {@code hallId}.
      */
-    private Hall getEmptyHallBySession(final Long hallId, final LocalDate sessionDate, final MovieSessionTime session) {
+    private Hall getEmptyHallBySession(final Long hallId, final LocalDateTime sessionDate, final MovieSessionTime session) {
         movieSessionRepository.findActiveSessionForHall(hallId, sessionDate, session)
                 .ifPresent((ms) -> {
                     throw new ResourceAlreadyExistException("There is a session for hall id: " + hallId);

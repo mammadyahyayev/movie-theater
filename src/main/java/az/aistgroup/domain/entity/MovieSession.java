@@ -16,7 +16,7 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
     @SequenceGenerator(name = "session_generator", sequenceName = "session_seq", allocationSize = 1)
     private Long id;
 
-    private LocalDate date;
+    private LocalDateTime date;
 
     @Enumerated(EnumType.STRING)
     private MovieSessionTime sessionTime;
@@ -43,11 +43,11 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
         this.id = id;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

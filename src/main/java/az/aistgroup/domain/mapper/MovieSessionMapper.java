@@ -10,7 +10,7 @@ public final class MovieSessionMapper {
 
     public static MovieSession toEntity(MovieSessionDto sessionDto) {
         var movieSession = new MovieSession();
-        movieSession.setDate(sessionDto.getDate());
+        movieSession.setDate(sessionDto.getDate().withHour(sessionDto.getSessionTime().getHourOfDay()));
         movieSession.setSessionTime(sessionDto.getSessionTime());
         movieSession.setPrice(sessionDto.getPrice());
         movieSession.setTicketsLeft(sessionDto.getTicketsLeft());
@@ -18,7 +18,7 @@ public final class MovieSessionMapper {
     }
 
     public static void toEntityInPlace(MovieSessionDto sessionDto, MovieSession movieSession) {
-        movieSession.setDate(sessionDto.getDate());
+        movieSession.setDate(sessionDto.getDate().withHour(sessionDto.getSessionTime().getHourOfDay()));
         movieSession.setSessionTime(sessionDto.getSessionTime());
         movieSession.setPrice(sessionDto.getPrice());
         movieSession.setTicketsLeft(sessionDto.getTicketsLeft());

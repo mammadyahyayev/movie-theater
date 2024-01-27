@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,5 +23,5 @@ public interface MovieSessionRepository extends CrudRepository<MovieSession, Lon
     List<MovieSessionViewDto> getAllMovieSessions();
 
     @Query("select ms from MovieSession ms where ms.hall.id = :hallId and ms.date = :date and ms.sessionTime = :sessionTime")
-    Optional<MovieSession> findActiveSessionForHall(Long hallId, LocalDate date, MovieSessionTime sessionTime);
+    Optional<MovieSession> findActiveSessionForHall(Long hallId, LocalDateTime date, MovieSessionTime sessionTime);
 }
