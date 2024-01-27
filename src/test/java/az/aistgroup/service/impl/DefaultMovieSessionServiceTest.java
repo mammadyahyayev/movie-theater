@@ -96,7 +96,7 @@ class DefaultMovieSessionServiceTest {
     }
 
     @Test
-    void throwException_WhenLessThanAnHourLeftForSessionTime_onNewSessionCreation() {
+    void throwException_whenLessThanAnHourLeftForSessionTime_onNewSessionCreation() {
         var savedHall = saveDefaultHall();
         var savedMovie = saveDefaultMovie();
 
@@ -155,6 +155,7 @@ class DefaultMovieSessionServiceTest {
         sessionDto.setMovieId(movieId);
         sessionDto.setHallId(hallId);
         sessionDto.setPrice(new BigDecimal("12.25"));
+        sessionDto.setClosed(false);
         return sessionDto;
     }
 

@@ -18,6 +18,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -28,17 +30,20 @@ public class DefaultTicketService implements TicketService {
     private final MovieSessionRepository sessionRepository;
     private final SeatRepository seatRepository;
     private final UserRepository userRepository;
+    private final Clock clock;
 
     public DefaultTicketService(
             TicketRepository ticketRepository,
             MovieSessionRepository sessionRepository,
             SeatRepository seatRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            Clock clock
     ) {
         this.ticketRepository = ticketRepository;
         this.sessionRepository = sessionRepository;
         this.seatRepository = seatRepository;
         this.userRepository = userRepository;
+        this.clock = clock;
     }
 
     @Override
@@ -76,10 +81,15 @@ public class DefaultTicketService implements TicketService {
 
     @Override
     @Transactional(readOnly = true)
-    public TicketDto getTicketById(final Long id) {
-        return ticketRepository.findById(id)
-                .map(TicketDto::new)
+    public TicketDto getTicketById(Long id, String username) {
+        Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Ticket with id: " + id + " not found!"));
+
+        if (!ticket.getUser().getUsername().equals(username)) {
+            throw new InvalidRequestException("The ticket doesn't belong to you!");
+        }
+
+        return new TicketDto(ticket);
     }
 
     @Override
@@ -90,6 +100,10 @@ public class DefaultTicketService implements TicketService {
         // check there are enough tickets to buy
         var session = sessionRepository.findById(ticketRequestDto.getSessionId())
                 .orElseThrow(() -> new ResourceNotFoundException("Session", ticketRequestDto.getSessionId()));
+
+        if (session.isClosed()) {
+            throw new InvalidRequestException("You can't buy a ticket because Session is already finished!");
+        }
 
         if (session.getTicketsLeft() == 0) {
             throw new NoTicketsAvailableException();
@@ -145,21 +159,26 @@ public class DefaultTicketService implements TicketService {
             throw new InvalidRequestException("You can't refund because the ticket doesn't belong to you.");
         }
 
-        var currentDateTime = LocalDateTime.now().minusHours(1);
-        if (ticket.getMovieSession().getDate().isAfter(currentDateTime)) {
+        MovieSession movieSession = ticket.getMovieSession();
+
+        int hourOfDay = movieSession.getSessionTime().getHourOfDay();
+        LocalDateTime sessionTime = movieSession.getDate().withHour(hourOfDay);
+        LocalDateTime now = LocalDateTime.now(clock);
+        Duration diff = Duration.between(now, sessionTime);
+        if (movieSession.isClosed() && diff.toMinutes() < 60 && diff.toMinutes() > 0) {
             throw new TicketExpiredException(
                     "You can't refund the ticket, because less than an hour left for session to begin!");
         }
 
         var user = ticket.getUser();
-        user.increaseBalance(ticket.getMovieSession().getPrice());
+        user.increaseBalance(movieSession.getPrice());
         userRepository.save(user);
 
-        var session = ticket.getMovieSession();
-        if (session.getHall().getCapacity() > session.getTicketsLeft()) {
-            session.setTicketsLeft(session.getTicketsLeft() + 1);
+        if (movieSession.getHall().getCapacity() > movieSession.getTicketsLeft()) {
+            movieSession.setTicketsLeft(movieSession.getTicketsLeft() + 1);
         }
-        sessionRepository.save(session);
+
+        sessionRepository.save(movieSession);
 
         ticketRepository.deleteById(ticketId);
     }
@@ -179,7 +198,6 @@ public class DefaultTicketService implements TicketService {
                 !session.getId().equals(ticketRequestDto.getSessionId())) {
             throw new InvalidRequestException("You can't change seat or movie session. You have to refund the ticket!");
         }
-
 
         User oldTicketOwner = ticket.getUser();
         User newTicketOwner;
@@ -202,6 +220,7 @@ public class DefaultTicketService implements TicketService {
 
             ticket.setUser(newTicketOwner);
         }
+
         Ticket updatedTicket = ticketRepository.save(ticket);
         return new TicketDto(updatedTicket);
     }

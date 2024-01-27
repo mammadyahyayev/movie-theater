@@ -33,6 +33,8 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
     @JoinColumn(name = "hall_id")
     private Hall hall;
 
+    private boolean isClosed;
+
     @Override
     public Long getId() {
         return this.id;
@@ -89,6 +91,14 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
 
     public void setHall(Hall hall) {
         this.hall = hall;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    public void setClosed(boolean closed) {
+        isClosed = closed;
     }
 
     public void decreaseLeftTickets() {

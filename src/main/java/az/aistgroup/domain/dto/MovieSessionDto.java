@@ -34,6 +34,9 @@ public class MovieSessionDto {
     @Positive(message = "{field.positive}")
     private Long hallId;
 
+    private boolean isClosed;
+
+
     public MovieSessionDto() {
     }
 
@@ -83,5 +86,13 @@ public class MovieSessionDto {
 
     public void setHallId(Long hallId) {
         this.hallId = hallId;
+    }
+
+    public boolean isClosed() {
+        return isClosed;
+    }
+
+    public void setClosed(boolean closed) {
+        isClosed = closed;
     }
 }

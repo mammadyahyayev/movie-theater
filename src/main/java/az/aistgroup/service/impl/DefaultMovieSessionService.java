@@ -97,6 +97,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
         }
 
         movieSession.setDate(sessionTime);
+        movieSession.setClosed(sessionDto.isClosed());
 
         MovieSession newSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(newSession);
@@ -117,7 +118,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
         Duration diff = Duration.between(now, sessionTime);
         if (diff.toMinutes() < 60 && diff.toMinutes() > 0) {
             throw new InvalidRequestException(
-                    "You can't create a new session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
+                    "You can't update session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
         }
 
         MovieSessionMapper.toEntityInPlace(sessionDto, movieSession);
@@ -144,6 +145,8 @@ public class DefaultMovieSessionService implements MovieSessionService {
         } else {
             movieSession.setTicketsLeft(sessionDto.getTicketsLeft());
         }
+
+        movieSession.setClosed(sessionDto.isClosed());
 
         var updatedSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(updatedSession);
