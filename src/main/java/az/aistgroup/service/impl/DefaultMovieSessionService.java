@@ -7,6 +7,7 @@ import az.aistgroup.domain.entity.MovieSession;
 import az.aistgroup.domain.enumeration.MovieSessionTime;
 import az.aistgroup.domain.mapper.MovieSessionMapper;
 import az.aistgroup.exception.CapacityExceedException;
+import az.aistgroup.exception.InvalidRequestException;
 import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
 import az.aistgroup.repository.HallRepository;
@@ -74,9 +75,16 @@ public class DefaultMovieSessionService implements MovieSessionService {
                             hall.getCapacity(), hall.getName());
             throw new CapacityExceedException(message);
         }
+
         int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
-        LocalDateTime localDateTime = sessionDto.getDate().withHour(hourOfDay);
-        movieSession.setDate(localDateTime);
+        LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
+        LocalDateTime oneHourBeforeNow = LocalDateTime.now().minusHours(1);
+        if (sessionTime.isAfter(oneHourBeforeNow)) {
+            throw new InvalidRequestException(
+                    "You can't create a new session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
+        }
+
+        movieSession.setDate(sessionTime);
 
         MovieSession newSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(newSession);
@@ -90,6 +98,14 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
         MovieSession movieSession = movieSessionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Session", id));
+
+        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
+        LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
+        LocalDateTime oneHourBeforeNow = LocalDateTime.now().minusHours(1);
+        if (sessionTime.isAfter(oneHourBeforeNow)) {
+            throw new InvalidRequestException(
+                    "You can't create a new session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
+        }
 
         MovieSessionMapper.toEntityInPlace(sessionDto, movieSession);
 

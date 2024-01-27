@@ -1,5 +1,6 @@
 package az.aistgroup.domain.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -13,7 +14,7 @@ public final class TicketRequestDto {
     @NotNull
     private Long seatId;
 
-    @NotNull
+    @NotBlank
     private String username;
 
     public TicketRequestDto() {}
