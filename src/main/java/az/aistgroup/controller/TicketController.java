@@ -2,17 +2,16 @@ package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.*;
 import az.aistgroup.security.AuthorityConstant;
-import az.aistgroup.security.SecurityUtils;
 import az.aistgroup.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import static az.aistgroup.security.SecurityUtils.checkUserHasPermission;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -66,12 +65,4 @@ public class TicketController {
         return new ResponseEntity<>(ticket, HttpStatus.OK);
     }
 
-    //TODO: This method is duplicate, find a way to extract it
-    private void checkUserHasPermission(String username) {
-        if (SecurityUtils.isSameLoggedInUser(username)) {
-            return;
-        }
-
-        throw new AccessDeniedException("You don't have permission to access the resource!");
-    }
 }

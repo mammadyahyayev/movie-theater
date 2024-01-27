@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.MessageFormat;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -27,15 +29,18 @@ public class DefaultMovieSessionService implements MovieSessionService {
     private final MovieSessionRepository movieSessionRepository;
     private final MovieRepository movieRepository;
     private final HallRepository hallRepository;
+    private final Clock clock;
 
     public DefaultMovieSessionService(
             MovieSessionRepository movieSessionRepository,
             MovieRepository movieRepository,
-            HallRepository hallRepository
+            HallRepository hallRepository,
+            Clock clock
     ) {
         this.movieSessionRepository = movieSessionRepository;
         this.movieRepository = movieRepository;
         this.hallRepository = hallRepository;
+        this.clock = clock;
     }
 
     @Override
@@ -56,6 +61,11 @@ public class DefaultMovieSessionService implements MovieSessionService {
     @Transactional
     public MovieSessionDto addSession(final MovieSessionDto sessionDto) {
         Objects.requireNonNull(sessionDto, "sessionDto can not be null!");
+        Objects.requireNonNull(sessionDto.getPrice(), "Price of movie session can not be null!");
+        Objects.requireNonNull(sessionDto.getMovieId(), "movieId can not be null!");
+        Objects.requireNonNull(sessionDto.getHallId(), "hallId can not be null!");
+        Objects.requireNonNull(sessionDto.getDate(), "date of the movie session can not be null!");
+        Objects.requireNonNull(sessionDto.getSessionTime(), "sessionTime can not be null!");
 
         var movieSession = MovieSessionMapper.toEntity(sessionDto);
 
@@ -64,6 +74,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
         movieSession.setMovie(movie);
 
         // checks whether there is active movie session for the hall at the given time
+        sessionDto.setDate(sessionDto.getDate().withHour(0).withMinute(0));
         var hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate(), sessionDto.getSessionTime());
         movieSession.setHall(hall);
 
@@ -78,8 +89,9 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
         int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
         LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
-        LocalDateTime oneHourBeforeNow = LocalDateTime.now().minusHours(1);
-        if (sessionTime.isAfter(oneHourBeforeNow)) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        Duration diff = Duration.between(now, sessionTime);
+        if (diff.toMinutes() < 60 && diff.toMinutes() > 0) {
             throw new InvalidRequestException(
                     "You can't create a new session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
         }
@@ -101,8 +113,9 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
         int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
         LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
-        LocalDateTime oneHourBeforeNow = LocalDateTime.now().minusHours(1);
-        if (sessionTime.isAfter(oneHourBeforeNow)) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        Duration diff = Duration.between(now, sessionTime);
+        if (diff.toMinutes() < 60 && diff.toMinutes() > 0) {
             throw new InvalidRequestException(
                     "You can't create a new session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
         }
@@ -123,13 +136,14 @@ public class DefaultMovieSessionService implements MovieSessionService {
             movieSession.setHall(hall);
         }
 
-        if (hall != null && sessionDto.getTicketsLeft() > hall.getCapacity()) {
+        if (sessionDto.getTicketsLeft() > hall.getCapacity()) {
             String message = MessageFormat
                     .format("Number of tickets can not be more than capacity({0}) of {1}",
                             hall.getCapacity(), hall.getName());
             throw new CapacityExceedException(message);
+        } else {
+            movieSession.setTicketsLeft(sessionDto.getTicketsLeft());
         }
-
 
         var updatedSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(updatedSession);
