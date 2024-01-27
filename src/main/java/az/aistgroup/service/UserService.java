@@ -2,9 +2,7 @@ package az.aistgroup.service;
 
 import az.aistgroup.domain.dto.*;
 
-import javax.swing.text.html.Option;
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
     List<UserViewDto> getAllUsers();
@@ -22,6 +20,8 @@ public interface UserService {
     UserDto updateUserByAdmin(String username, UserDto userDto);
 
     void deleteUser(String username);
+
+    UserDto topUpBalance(TopUpBalanceDto topUpBalanceDto);
 
     void checkLoginCredentials(LoginDto loginDto);
 }

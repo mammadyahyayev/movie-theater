@@ -237,6 +237,20 @@ public class DefaultUserService implements UserService, UserDetailsService {
     }
 
     @Override
+    public UserDto topUpBalance(TopUpBalanceDto topUpBalanceDto) {
+        Objects.requireNonNull(topUpBalanceDto, "topUpBalanceDto cannot be null!");
+
+        String username = topUpBalanceDto.getUsername();
+        var user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User '" + username + "' not found!"));
+
+        user.increaseBalance(topUpBalanceDto.getAmount());
+
+        userRepository.save(user);
+        return new UserDto(user);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public void checkLoginCredentials(LoginDto loginDto) {
         LOG.debug("validating credentials for {}", loginDto.username());

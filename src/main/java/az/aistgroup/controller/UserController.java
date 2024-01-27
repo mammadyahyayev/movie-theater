@@ -1,9 +1,6 @@
 package az.aistgroup.controller;
 
-import az.aistgroup.domain.dto.OperationResponseDto;
-import az.aistgroup.domain.dto.UpdateUserRequestDto;
-import az.aistgroup.domain.dto.UserDto;
-import az.aistgroup.domain.dto.UserViewDto;
+import az.aistgroup.domain.dto.*;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.security.SecurityUtils;
@@ -144,6 +141,37 @@ public class UserController {
 
         userService.deleteUser(username);
         var response = new OperationResponseDto(true, "User '" + username + "' deleted...");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Increase user's balance.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Returns a successful operation result.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = OperationResponseDto.class))}),
+
+            @ApiResponse(responseCode = "404", description = "Returns given username isn't found.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
+            @ApiResponse(responseCode = "403",
+                    description = "Returns when given username and logged in user's username aren't matched",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+
+            @ApiResponse(responseCode = "400",
+                    description = "When given amount is negative or format of amount is not correct. Amount format must be: e.g 34.75",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))})
+    })
+    @PostMapping("/balance/top-up")
+    public ResponseEntity<OperationResponseDto> increaseBalance(@Valid @RequestBody TopUpBalanceDto topUpBalanceDto) {
+        String username = topUpBalanceDto.getUsername();
+        checkUserHasPermission(username);
+
+        UserDto userDto = userService.topUpBalance(topUpBalanceDto);
+        String responseMessage = "User '" + username + "' balance increased to " + userDto.getBalance();
+        var response = new OperationResponseDto(true, responseMessage);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
