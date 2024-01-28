@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class ErrorResponse {
-    private int status;
+    private HttpStatus status;
     private List<Error> errors;
     private LocalDateTime timestamp;
 
@@ -23,16 +23,16 @@ public class ErrorResponse {
 
     public static ErrorResponse getDefaultErrorResponse(HttpStatus status, ErrorResponseCode response, String message, String field) {
         var errorResponse = new ErrorResponse();
-        errorResponse.setStatus(status.value());
+        errorResponse.setStatus(status);
         errorResponse.setErrors(List.of(new ErrorResponse.Error(response.getCode(), message, field)));
         return errorResponse;
     }
 
-    public int getStatus() {
+    public HttpStatus getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(HttpStatus status) {
         this.status = status;
     }
 

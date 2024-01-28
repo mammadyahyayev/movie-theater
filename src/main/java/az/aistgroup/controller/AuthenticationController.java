@@ -5,8 +5,11 @@ import az.aistgroup.domain.dto.RegisterDto;
 import az.aistgroup.domain.dto.UserDto;
 import az.aistgroup.domain.dto.UserView;
 import az.aistgroup.exception.ErrorResponse;
-import az.aistgroup.security.jwt.TokenGenerator;
+import az.aistgroup.exception.TokenValidityException;
+import az.aistgroup.security.TokenType;
+import az.aistgroup.security.jwt.TokenProvider;
 import az.aistgroup.service.UserService;
+import io.jsonwebtoken.Claims;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,6 +31,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
+import java.util.Map;
+
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 
 @RestController
@@ -37,16 +43,16 @@ public class AuthenticationController {
 
     private final UserService userService;
     private final AuthenticationManagerBuilder authManagerBuilder;
-    private final TokenGenerator tokenGenerator;
+    private final TokenProvider tokenProvider;
 
     public AuthenticationController(
             UserService userService,
             AuthenticationManagerBuilder authManagerBuilder,
-            TokenGenerator tokenGenerator
+            TokenProvider tokenProvider
     ) {
         this.userService = userService;
         this.authManagerBuilder = authManagerBuilder;
-        this.tokenGenerator = tokenGenerator;
+        this.tokenProvider = tokenProvider;
     }
 
     @Operation(summary = "Register a new user")
@@ -91,9 +97,16 @@ public class AuthenticationController {
         Authentication authentication = authManagerBuilder.getObject().authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String accessToken = tokenGenerator.generateAccessToken(authentication);
-        String refreshToken = tokenGenerator.generateRefreshToken(authentication);
-        return new ResponseEntity<>(new JwtToken(accessToken, refreshToken), HttpStatus.OK);
+        Map.Entry<String, Date> accessTokenInfo = tokenProvider.generateAccessToken(authentication);
+        String accessToken = accessTokenInfo.getKey();
+        Date accessTokenValidity = accessTokenInfo.getValue();
+
+        Map.Entry<String, Date> refreshTokenInfo = tokenProvider.generateRefreshToken(authentication);
+        String refreshToken = refreshTokenInfo.getKey();
+        Date refreshTokenValidity = refreshTokenInfo.getValue();
+
+        var token = new JwtToken(accessToken, accessTokenValidity, refreshToken, refreshTokenValidity);
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
     @Operation(summary = "Get new access token by sending refresh token")
@@ -107,14 +120,28 @@ public class AuthenticationController {
     })
     @PostMapping("/token/refresh")
     public ResponseEntity<JwtToken> getToken(@Valid @RequestBody RefreshTokenDto refreshTokenDto) {
-        Authentication authentication = tokenGenerator.getAuthentication(refreshTokenDto.refreshToken());
-        if (authentication == null) {
-            // Handle invalid refresh token
+        var refreshToken = refreshTokenDto.refreshToken();
+
+        var tokenValidityResponse = tokenProvider.checkTokenValidity(refreshToken);
+        if (!tokenValidityResponse.isValid()) {
+            throw new TokenValidityException(TokenType.REFRESH_TOKEN, tokenValidityResponse.code());
         }
 
-        String accessToken = tokenGenerator.generateAccessToken(authentication);
+        Claims claims = tokenProvider.getClaims(refreshToken);
+        if (!claims.get(TokenProvider.TOKEN_TYPE).equals(TokenType.REFRESH_TOKEN.toString())) {
+            throw new TokenValidityException(TokenType.REFRESH_TOKEN, "Provided token is not a refresh token!");
+        }
+
+        Date refreshTokenValidity = claims.getExpiration();
+        Authentication authentication = tokenProvider.getAuthentication(claims);
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>(new JwtToken(accessToken, refreshTokenDto.refreshToken()), HttpStatus.OK);
+
+        Map.Entry<String, Date> accessTokenInfo = tokenProvider.generateAccessToken(authentication);
+        String accessToken = accessTokenInfo.getKey();
+        Date accessTokenValidity = accessTokenInfo.getValue();
+
+        var token = new JwtToken(accessToken, accessTokenValidity, refreshToken, refreshTokenValidity);
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
     public record RefreshTokenDto(
@@ -123,6 +150,12 @@ public class AuthenticationController {
     ) {
     }
 
-    public record JwtToken(String accessToken, String refreshToken) {
+    public record JwtToken(String accessToken, Date accessTokenExpiresIn,
+                           String refreshToken, Date refreshTokenExpiresIn) {
+
+        @Override
+        public String toString() {
+            return "JWTToken";
+        }
     }
 }

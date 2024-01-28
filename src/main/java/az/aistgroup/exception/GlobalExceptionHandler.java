@@ -1,5 +1,6 @@
 package az.aistgroup.exception;
 
+import az.aistgroup.security.TokenType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import org.slf4j.Logger;
@@ -23,6 +24,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static az.aistgroup.exception.ErrorResponse.getDefaultErrorResponse;
 import static az.aistgroup.exception.ErrorResponseCode.*;
 
 @ControllerAdvice
@@ -35,7 +37,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status, WebRequest request
     ) {
         var errorResponse = new ErrorResponse();
-        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST);
 
         var errors = new ArrayList<ErrorResponse.Error>();
         for (ObjectError err : ex.getBindingResult().getAllErrors()) {
@@ -45,7 +47,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         errorResponse.setErrors(errors);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     private void handleFieldErrors(ObjectError err, FieldError fieldError, List<ErrorResponse.Error> errors) {
@@ -62,89 +64,107 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.NOT_FOUND, RESOURCE_NOT_FOUND, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(CapacityExceedException.class)
     public ResponseEntity<ErrorResponse> handleCapacityExceedException(CapacityExceedException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, CAPACITY_EXCEEDED, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(SeatAlreadyBookedException.class)
     public ResponseEntity<ErrorResponse> handleSeatAlreadyBookedException(SeatAlreadyBookedException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, SEAT_BOOKED, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientFundsException(InsufficientFundsException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, INSUFFICIENT_FUNDS, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(NoTicketsAvailableException.class)
     public ResponseEntity<ErrorResponse> handleNoTicketsAvailableException(NoTicketsAvailableException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, NO_TICKETS_AVAILABLE, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(ResourceAlreadyExistException.class)
     public ResponseEntity<ErrorResponse> handleResourceAlreadyExistException(ResourceAlreadyExistException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, RESOURCE_ALREADY_EXIST, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<ErrorResponse> handleInvalidRequestException(InvalidRequestException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, INVALID_REQUEST, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(TicketExpiredException.class)
     public ResponseEntity<ErrorResponse> handleTicketExpiredException(TicketExpiredException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, TICKET_EXPIRED, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.UNAUTHORIZED, BAD_CREDENTIALS, e.getMessage(), null);
         log.error("Bad Credentials Exception: {}", e.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler({AccessDeniedException.class})
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException e, HttpServletRequest req) {
-        var errorResponse = ErrorResponse.getDefaultErrorResponse(HttpStatus.FORBIDDEN, ACCESS_DENIED,
+        var errorResponse = getDefaultErrorResponse(HttpStatus.FORBIDDEN, ACCESS_DENIED,
                 "You don't have permission to perform this operation!");
         log.error("Access Denied Exception: {}", e.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler({AuthenticationException.class})
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException e, HttpServletRequest req) {
-        var errorResponse = ErrorResponse.getDefaultErrorResponse(HttpStatus.UNAUTHORIZED,
+        var errorResponse = getDefaultErrorResponse(HttpStatus.UNAUTHORIZED,
                 ErrorResponseCode.UNAUTHORIZED, "You aren't authorized to send request!");
         log.error("Authentication Exception: {}", e.getMessage());
-        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+    }
+
+    @ExceptionHandler(TokenValidityException.class)
+    public ResponseEntity<ErrorResponse> handleTokenValidityException(TokenValidityException e, HttpServletRequest req) {
+        ErrorResponseCode code = null;
+        String message = null;
+
+        if (e.getMessage().contains(TOKEN_EXPIRED.getCode())) {
+            if (e.getTokenType() == TokenType.REFRESH_TOKEN) {
+                code = REFRESH_TOKEN_EXPIRED;
+                message = "Refresh token is already expired, please login to get new token combination";
+            } else {
+                code = TOKEN_EXPIRED;
+                message = "Access token is already expired, please use refresh token to get new access token!";
+            }
+        } else if (e.getMessage().contains(INVALID_TOKEN.getCode())) {
+            code = INVALID_TOKEN;
+            message = "Token is invalid, please use correct token!";
+        } else {
+            code = ACCESS_DENIED;
+            message = e.getMessage();
+        }
+
+        var errorResponse = getDefaultErrorResponse(HttpStatus.FORBIDDEN, code, message);
+        log.error("Token Validity Exception: {}", e.getMessage());
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception e, HttpServletRequest request) {
         var errorResponse = getDefaultErrorResponse(
                 HttpStatus.INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR,
-                "Internal Server Error happened. We are working on it...", null
-        );
+                "Internal Server Error happened. We are working on it...");
 
         log.error("Internal Exception happened: {}", e.getMessage(), e);
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    private ErrorResponse getDefaultErrorResponse(HttpStatus status, ErrorResponseCode response, String message, String field) {
-        var errorResponse = new ErrorResponse();
-        errorResponse.setStatus(status.value());
-        errorResponse.setErrors(List.of(new ErrorResponse.Error(response.getCode(), message, field)));
-        return errorResponse;
+        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
     }
 }

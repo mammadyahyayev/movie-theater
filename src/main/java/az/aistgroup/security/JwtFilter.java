@@ -1,7 +1,8 @@
 package az.aistgroup.security;
 
-import az.aistgroup.security.jwt.TokenGenerator;
+import az.aistgroup.security.jwt.TokenProvider;
 import az.aistgroup.util.Strings;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,19 +11,20 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-    private final TokenGenerator tokenGenerator;
+    private final TokenProvider tokenProvider;
     private final AppSecurityProperties securityProperties;
 
     public JwtFilter(
-            TokenGenerator tokenGenerator,
+            TokenProvider tokenProvider,
             AppSecurityProperties securityProperties
     ) {
-        this.tokenGenerator = tokenGenerator;
+        this.tokenProvider = tokenProvider;
         this.securityProperties = securityProperties;
     }
 
@@ -30,8 +32,10 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String token = this.resolveToken(request);
-        if (Strings.hasText(token) && tokenGenerator.isValidToken(token)) {
-            Authentication authentication = tokenGenerator.getAuthentication(token);
+
+        if (Strings.hasText(token) && tokenProvider.checkTokenValidity(token).isValid()) {
+            Claims claims = tokenProvider.getClaims(token);
+            Authentication authentication = tokenProvider.getAuthentication(claims);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
@@ -49,7 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
         var tokenProperties = securityProperties.getTokenProperties();
         String bearerToken = request.getHeader(tokenProperties.getAuthorizationHeaderText());
         String tokenPrefix = tokenProperties.getTokenPrefix();
-        
+
         if (Strings.hasText(bearerToken) && bearerToken.startsWith(tokenPrefix)) {
             return bearerToken.substring(tokenPrefix.length());
         }

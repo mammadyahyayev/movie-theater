@@ -12,7 +12,10 @@ public enum ErrorResponseCode {
     SEAT_BOOKED("seat.booked"),
     INSUFFICIENT_FUNDS("insufficient.funds"),
     NO_TICKETS_AVAILABLE("zero.tickets.left"),
-    TICKET_EXPIRED("ticket.expired");
+    TICKET_EXPIRED("ticket.expired"),
+    TOKEN_EXPIRED("token.expired"),
+    REFRESH_TOKEN_EXPIRED("refresh.token.expired"),
+    INVALID_TOKEN("invalid.token");
 
     private final String code;
 

@@ -2,7 +2,7 @@ package az.aistgroup.security;
 
 import az.aistgroup.exception.AccessDeniedExceptionHandler;
 import az.aistgroup.exception.UnAuthorizedExceptionHandler;
-import az.aistgroup.security.jwt.TokenGenerator;
+import az.aistgroup.security.jwt.TokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,27 +18,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @Configuration
 public class SecurityConfig {
-    private final TokenGenerator tokenGenerator;
+    private final TokenProvider tokenProvider;
     private final AppSecurityProperties securityProperties;
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     public SecurityConfig(
-            TokenGenerator tokenGenerator,
+            TokenProvider tokenProvider,
             AppSecurityProperties securityProperties, HandlerExceptionResolver handlerExceptionResolver
     ) {
-        this.tokenGenerator = tokenGenerator;
+        this.tokenProvider = tokenProvider;
         this.securityProperties = securityProperties;
         this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        var jwtFilter = new JwtFilter(tokenProvider, securityProperties);
+
         http
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -46,13 +47,12 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new UnAuthorizedExceptionHandler(handlerExceptionResolver))
                         .accessDeniedHandler(new AccessDeniedExceptionHandler(handlerExceptionResolver))
                 )
-                .addFilterBefore(
-                        new JwtFilter(tokenGenerator, securityProperties), UsernamePasswordAuthenticationFilter.class
-                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/token/refresh").permitAll()
                         .requestMatchers("/api/**").authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
