@@ -2,6 +2,7 @@ package az.aistgroup.domain.dto;
 
 import az.aistgroup.domain.entity.User;
 import az.aistgroup.util.Strings;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 
@@ -13,6 +14,7 @@ import java.util.Set;
 import static az.aistgroup.constants.ValidationConstant.PASSWORD_MAX_LENGTH;
 import static az.aistgroup.constants.ValidationConstant.PASSWORD_MIN_LENGTH;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserDto implements Serializable {
     @NotBlank(message = "{field.notBlank}")
     private String firstName;
@@ -36,6 +38,7 @@ public class UserDto implements Serializable {
     @Digits(integer = 10, fraction = 2, message = "Amount format must be: e.g 34.75")
     private BigDecimal balance;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private Set<String> authorities = new HashSet<>();
 
     public UserDto() {
@@ -47,7 +50,6 @@ public class UserDto implements Serializable {
         setFatherName(user.getFatherName());
         setUsername(user.getUsername());
         setBalance(user.getBalance());
-        //TODO: Consider assigning authorities in here because UserDto prints authorities empty array
     }
 
     public String getFirstName() {

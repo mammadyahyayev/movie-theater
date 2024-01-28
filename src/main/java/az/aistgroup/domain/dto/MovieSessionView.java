@@ -1,13 +1,11 @@
 package az.aistgroup.domain.dto;
 
-import az.aistgroup.domain.enumeration.MovieSessionTime;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class MovieSessionView {
     private LocalDateTime date;
-    private MovieSessionTime sessionTime;
+    private String sessionTime;
     private BigDecimal price;
     private int ticketsLeft;
     private String movieName;
@@ -24,11 +22,11 @@ public class MovieSessionView {
         this.date = date;
     }
 
-    public MovieSessionTime getSessionTime() {
+    public String getSessionTime() {
         return sessionTime;
     }
 
-    public void setSessionTime(MovieSessionTime sessionTime) {
+    public void setSessionTime(String sessionTime) {
         this.sessionTime = sessionTime;
     }
 

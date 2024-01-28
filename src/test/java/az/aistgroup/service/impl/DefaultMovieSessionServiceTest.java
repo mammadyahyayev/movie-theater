@@ -151,7 +151,7 @@ class DefaultMovieSessionServiceTest {
     private MovieSessionDto getDefaultSessionDto(Long movieId, Long hallId, LocalDateTime date, MovieSessionTime sessionTime) {
         var sessionDto = new MovieSessionDto();
         sessionDto.setDate(date);
-        sessionDto.setSessionTime(sessionTime);
+        sessionDto.setSessionTime(sessionTime.toString());
         sessionDto.setMovieId(movieId);
         sessionDto.setHallId(hallId);
         sessionDto.setPrice(new BigDecimal("12.25"));

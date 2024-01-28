@@ -1,7 +1,7 @@
 package az.aistgroup.domain.dto;
 
-import az.aistgroup.domain.enumeration.MovieSessionTime;
 import az.aistgroup.validation.CurrentAndFutureDate;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -16,8 +16,8 @@ public class MovieSessionDto {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
 
-    @NotNull(message = "{field.notNull}")
-    private MovieSessionTime sessionTime;
+    @NotBlank(message = "{field.notBlank}")
+    private String sessionTime;
 
     @NotNull(message = "{field.notNull}")
     @Positive(message = "{field.positive}")
@@ -48,11 +48,11 @@ public class MovieSessionDto {
         this.date = date;
     }
 
-    public MovieSessionTime getSessionTime() {
+    public String getSessionTime() {
         return sessionTime;
     }
 
-    public void setSessionTime(MovieSessionTime sessionTime) {
+    public void setSessionTime(String sessionTime) {
         this.sessionTime = sessionTime;
     }
 

@@ -1,8 +1,10 @@
 package az.aistgroup.domain.dto;
 
 import az.aistgroup.domain.entity.Ticket;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.hateoas.RepresentationModel;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class TicketDto extends RepresentationModel<TicketDto> {
     private Long id;
     private String movie;

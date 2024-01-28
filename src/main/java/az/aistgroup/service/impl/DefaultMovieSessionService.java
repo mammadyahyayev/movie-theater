@@ -75,7 +75,8 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
         // checks whether there is active movie session for the hall at the given time
         sessionDto.setDate(sessionDto.getDate().withHour(0).withMinute(0));
-        var hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate(), sessionDto.getSessionTime());
+        var movieSessionTime = MovieSessionTime.valueOf(sessionDto.getSessionTime().toUpperCase());
+        var hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate(), movieSessionTime);
         movieSession.setHall(hall);
 
         if (sessionDto.getTicketsLeft() == 0) {
@@ -93,7 +94,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
                     "You can't create a new session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
         }
 
-        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
+        int hourOfDay = movieSessionTime.getHourOfDay();
         LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
         movieSession.setDate(sessionTime);
         movieSession.setClosed(sessionDto.isClosed());
@@ -129,7 +130,8 @@ public class DefaultMovieSessionService implements MovieSessionService {
         // update Hall
         Hall hall = movieSession.getHall();
         if (movieSession.getHall() != null && !hall.getId().equals(sessionDto.getHallId())) {
-            hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate(), sessionDto.getSessionTime());
+            var movieSessionTime = MovieSessionTime.valueOf(sessionDto.getSessionTime().toUpperCase());
+            hall = getEmptyHallBySession(sessionDto.getHallId(), sessionDto.getDate(), movieSessionTime);
             movieSession.setHall(hall);
         }
 
@@ -190,10 +192,11 @@ public class DefaultMovieSessionService implements MovieSessionService {
      * @return {@link Duration} between dates.
      */
     private Duration differenceBetweenNowAndSessionTime(MovieSessionDto sessionDto) {
-        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
-        LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
+        MovieSessionTime movieSessionTime = MovieSessionTime.valueOf(sessionDto.getSessionTime().toUpperCase());
+        int hourOfDay = movieSessionTime.getHourOfDay();
+        LocalDateTime sessionDateTime = sessionDto.getDate().withHour(hourOfDay);
         LocalDateTime now = LocalDateTime.now(clock);
-        return Duration.between(now, sessionTime);
+        return Duration.between(now, sessionDateTime);
     }
 
 }

@@ -2,6 +2,7 @@ package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.MovieDto;
 import az.aistgroup.domain.entity.Movie;
+import az.aistgroup.domain.enumeration.MovieGenre;
 import az.aistgroup.domain.mapper.MovieMapper;
 import az.aistgroup.exception.ResourceNotFoundException;
 import az.aistgroup.repository.MovieRepository;
@@ -27,7 +28,9 @@ public class DefaultMovieService implements MovieService {
     @Override
     @Transactional(readOnly = true)
     public List<MovieDto> getAllMovies() {
-        return movieRepository.findAllForMovieView();
+        return movieRepository.findAll().stream()
+                .map(MovieDto::new)
+                .toList();
     }
 
     @Override
@@ -60,7 +63,7 @@ public class DefaultMovieService implements MovieService {
                 .orElseThrow(() -> new ResourceNotFoundException("Movie", id));
 
         movie.setName(movieDto.getName());
-        movie.setGenre(movieDto.getGenre());
+        movie.setGenre(MovieGenre.valueOf(movieDto.getGenre().toUpperCase()));
 
         Movie updatedMovie = movieRepository.save(movie);
         LOG.debug("Movie with id: " + id + " is updated!");
