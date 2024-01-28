@@ -37,7 +37,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status, WebRequest request
     ) {
         var errorResponse = new ErrorResponse();
-        errorResponse.setStatus(HttpStatus.BAD_REQUEST);
+        errorResponse.setStatus(HttpStatus.BAD_REQUEST.value());
 
         var errors = new ArrayList<ErrorResponse.Error>();
         for (ObjectError err : ex.getBindingResult().getAllErrors()) {
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         errorResponse.setErrors(errors);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     private void handleFieldErrors(ObjectError err, FieldError fieldError, List<ErrorResponse.Error> errors) {
@@ -64,56 +64,56 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.NOT_FOUND, RESOURCE_NOT_FOUND, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(CapacityExceedException.class)
     public ResponseEntity<ErrorResponse> handleCapacityExceedException(CapacityExceedException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, CAPACITY_EXCEEDED, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(SeatAlreadyBookedException.class)
     public ResponseEntity<ErrorResponse> handleSeatAlreadyBookedException(SeatAlreadyBookedException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, SEAT_BOOKED, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<ErrorResponse> handleInsufficientFundsException(InsufficientFundsException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, INSUFFICIENT_FUNDS, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(NoTicketsAvailableException.class)
     public ResponseEntity<ErrorResponse> handleNoTicketsAvailableException(NoTicketsAvailableException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, NO_TICKETS_AVAILABLE, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(ResourceAlreadyExistException.class)
     public ResponseEntity<ErrorResponse> handleResourceAlreadyExistException(ResourceAlreadyExistException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, RESOURCE_ALREADY_EXIST, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<ErrorResponse> handleInvalidRequestException(InvalidRequestException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, INVALID_REQUEST, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(TicketExpiredException.class)
     public ResponseEntity<ErrorResponse> handleTicketExpiredException(TicketExpiredException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.BAD_REQUEST, TICKET_EXPIRED, e.getMessage(), null);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentialsException(BadCredentialsException e, HttpServletRequest req) {
         var errorResponse = getDefaultErrorResponse(HttpStatus.UNAUTHORIZED, BAD_CREDENTIALS, e.getMessage(), null);
         log.error("Bad Credentials Exception: {}", e.getMessage());
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler({AccessDeniedException.class})
@@ -121,7 +121,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         var errorResponse = getDefaultErrorResponse(HttpStatus.FORBIDDEN, ACCESS_DENIED,
                 "You don't have permission to perform this operation!");
         log.error("Access Denied Exception: {}", e.getMessage());
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler({AuthenticationException.class})
@@ -129,13 +129,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         var errorResponse = getDefaultErrorResponse(HttpStatus.UNAUTHORIZED,
                 ErrorResponseCode.UNAUTHORIZED, "You aren't authorized to send request!");
         log.error("Authentication Exception: {}", e.getMessage());
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(TokenValidityException.class)
     public ResponseEntity<ErrorResponse> handleTokenValidityException(TokenValidityException e, HttpServletRequest req) {
-        ErrorResponseCode code = null;
-        String message = null;
+        ErrorResponseCode code;
+        String message;
 
         if (e.getMessage().contains(TOKEN_EXPIRED.getCode())) {
             if (e.getTokenType() == TokenType.REFRESH_TOKEN) {
@@ -155,7 +155,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         var errorResponse = getDefaultErrorResponse(HttpStatus.FORBIDDEN, code, message);
         log.error("Token Validity Exception: {}", e.getMessage());
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -165,6 +165,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 "Internal Server Error happened. We are working on it...");
 
         log.error("Internal Exception happened: {}", e.getMessage(), e);
-        return new ResponseEntity<>(errorResponse, errorResponse.getStatus());
+        return new ResponseEntity<>(errorResponse, HttpStatusCode.valueOf(errorResponse.getStatus()));
     }
 }

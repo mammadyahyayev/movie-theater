@@ -114,6 +114,11 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "200", description = "Returns access token and refresh token for user.",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = JwtToken.class))}),
+
+            @ApiResponse(responseCode = "403", description = "Returns when refresh token is expired or given token is not a refresh token",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class))}),
+
             @ApiResponse(responseCode = "400", description = "Returns when refresh token is null or empty",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class))})
