@@ -14,6 +14,7 @@ import az.aistgroup.repository.HallRepository;
 import az.aistgroup.repository.MovieRepository;
 import az.aistgroup.repository.MovieSessionRepository;
 import az.aistgroup.service.MovieSessionService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -160,6 +161,20 @@ public class DefaultMovieSessionService implements MovieSessionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Session", id));
 
         movieSessionRepository.delete(movieSession);
+    }
+
+    /**
+     * Schedules a job that will be executed in every 12 hours and will
+     * close past movie sessions.
+     */
+    @Scheduled(cron = "0 0 */12 * * *")
+    @Transactional
+    public void deleteInActiveUsers() {
+        this.movieSessionRepository.findAllPastMovieSessions(LocalDateTime.now().minusDays(1))
+                .forEach(movieSession -> {
+                    movieSession.setClosed(true);
+                    this.movieSessionRepository.save(movieSession);
+                });
     }
 
     /**

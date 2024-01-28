@@ -24,4 +24,7 @@ public interface MovieSessionRepository extends CrudRepository<MovieSession, Lon
 
     @Query("select ms from MovieSession ms where ms.hall.id = :hallId and ms.date = :date and ms.sessionTime = :sessionTime")
     Optional<MovieSession> findActiveSessionForHall(Long hallId, LocalDateTime date, MovieSessionTime sessionTime);
+
+    @Query("SELECT ms from MovieSession ms where ms.date < :date")
+    List<MovieSession> findAllPastMovieSessions(LocalDateTime date);
 }
