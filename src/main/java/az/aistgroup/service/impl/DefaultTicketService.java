@@ -134,6 +134,9 @@ public class DefaultTicketService implements TicketService {
         userRepository.save(user);
 
         session.decreaseLeftTickets();
+        if (session.getTicketsLeft() == 0) {
+            session.setClosed(true);
+        }
         sessionRepository.save(session);
 
         var ticket = new Ticket();
@@ -161,11 +164,15 @@ public class DefaultTicketService implements TicketService {
 
         MovieSession movieSession = ticket.getMovieSession();
 
+        if (movieSession.isClosed()) {
+            throw new TicketExpiredException("You can't refund the ticket, because session is finished!");
+        }
+
         int hourOfDay = movieSession.getSessionTime().getHourOfDay();
         LocalDateTime sessionTime = movieSession.getDate().withHour(hourOfDay);
         LocalDateTime now = LocalDateTime.now(clock);
         Duration diff = Duration.between(now, sessionTime);
-        if (movieSession.isClosed() && diff.toMinutes() < 60 && diff.toMinutes() > 0) {
+        if (diff.toMinutes() < 60 && diff.toMinutes() > 0) {
             throw new TicketExpiredException(
                     "You can't refund the ticket, because less than an hour left for session to begin!");
         }
@@ -176,6 +183,7 @@ public class DefaultTicketService implements TicketService {
 
         if (movieSession.getHall().getCapacity() > movieSession.getTicketsLeft()) {
             movieSession.setTicketsLeft(movieSession.getTicketsLeft() + 1);
+            movieSession.setClosed(false);
         }
 
         sessionRepository.save(movieSession);
