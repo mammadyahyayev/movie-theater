@@ -17,6 +17,7 @@ public class Movie extends AbstractAuditingEntity<Long> {
     @Enumerated(EnumType.STRING)
     private MovieGenre genre;
 
+    //region Getters & Setters
     @Override
     public Long getId() {
         return this.id;
@@ -42,4 +43,5 @@ public class Movie extends AbstractAuditingEntity<Long> {
     public void setGenre(MovieGenre genre) {
         this.genre = genre;
     }
+    //endregion
 }

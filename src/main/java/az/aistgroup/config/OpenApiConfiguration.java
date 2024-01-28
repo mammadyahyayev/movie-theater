@@ -8,11 +8,21 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration for OPEN Api.
+ */
 @Configuration
 public class OpenApiConfiguration {
+
+    /**
+     * The Bean is used to set base configurations such as project <b>name</b>, <b>version</b>,
+     * <b>description</b> and so on.
+     *
+     * @return {@link OpenAPI}
+     */
     @Bean
     public OpenAPI configureOpenApiSecurity() {
-        final String securitySchemeName = "bearerAuth";
+        var securitySchemeName = "bearerAuth";
         return new OpenAPI()
                 .info(new Info()
                         .title("Movie Theater REST API")

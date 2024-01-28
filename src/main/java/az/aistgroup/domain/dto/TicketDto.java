@@ -1,9 +1,10 @@
 package az.aistgroup.domain.dto;
 
 import az.aistgroup.domain.entity.Ticket;
+import org.springframework.hateoas.RepresentationModel;
 
-//TODO: Maybe change this to TicketView (and also consider removing Dto suffix from Views)
-public class TicketDto {
+public class TicketDto extends RepresentationModel<TicketDto> {
+    private Long id;
     private String movie;
     private String session;
     private String ticketHolder;
@@ -13,10 +14,19 @@ public class TicketDto {
     }
 
     public TicketDto(Ticket ticket) {
-        this.movie = ticket.getMovieSession().getMovie().getName();
-        this.session = ticket.getMovieSession().getDate() + " " + ticket.getMovieSession().getSessionTime();
-        this.ticketHolder = ticket.getUser().getFullName();
-        this.seat = ticket.getSeat().getHall().getName() + " Seat: " + ticket.getSeat().getSeatNum();
+        this.id = ticket.getId();
+        this.movie = ticket.getMovieName();
+        this.session = ticket.getMovieSessionTime();
+        this.ticketHolder = ticket.getTicketHolder();
+        this.seat = ticket.getSeatName();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getMovie() {

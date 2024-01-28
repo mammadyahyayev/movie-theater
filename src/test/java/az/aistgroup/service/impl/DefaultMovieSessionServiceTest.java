@@ -6,7 +6,7 @@ import az.aistgroup.domain.entity.Movie;
 import az.aistgroup.domain.entity.MovieSession;
 import az.aistgroup.domain.enumeration.MovieGenre;
 import az.aistgroup.domain.enumeration.MovieSessionTime;
-import az.aistgroup.exception.CapacityExceedException;
+import az.aistgroup.exception.HallCapacityExceedException;
 import az.aistgroup.exception.InvalidRequestException;
 import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
@@ -91,7 +91,7 @@ class DefaultMovieSessionServiceTest {
         var sessionDto = getDefaultSessionDto(savedMovie.getId(), savedHall.getId(), date, MORNING);
         sessionDto.setTicketsLeft(15);
 
-        var exception = assertThrows(CapacityExceedException.class, () -> sessionService.addSession(sessionDto));
+        var exception = assertThrows(HallCapacityExceedException.class, () -> sessionService.addSession(sessionDto));
         assertThat(exception.getMessage()).contains(String.valueOf(savedHall.getName()));
     }
 

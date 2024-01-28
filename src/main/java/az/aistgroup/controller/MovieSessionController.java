@@ -1,7 +1,7 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.MovieSessionDto;
-import az.aistgroup.domain.dto.MovieSessionViewDto;
+import az.aistgroup.domain.dto.MovieSessionView;
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.AuthorityConstant;
@@ -32,11 +32,11 @@ public class MovieSessionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Returns all available movie sessions.",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = MovieSessionViewDto.class))})
+                            schema = @Schema(implementation = MovieSessionView.class))})
     })
     @GetMapping
-    public ResponseEntity<List<MovieSessionViewDto>> getAllSessions() {
-        List<MovieSessionViewDto> movies = movieSessionService.getSessions();
+    public ResponseEntity<List<MovieSessionView>> getAllSessions() {
+        List<MovieSessionView> movies = movieSessionService.getSessions();
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 

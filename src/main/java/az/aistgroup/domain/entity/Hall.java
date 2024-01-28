@@ -21,6 +21,7 @@ public class Hall extends AbstractAuditingEntity<Long> {
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, mappedBy = "hall", cascade = CascadeType.ALL)
     private Set<Seat> seats = new HashSet<>();
 
+    //region Getters & Setters
     @Override
     public Long getId() {
         return this.id;
@@ -54,4 +55,5 @@ public class Hall extends AbstractAuditingEntity<Long> {
     public void setSeats(Set<Seat> seats) {
         this.seats = seats;
     }
+    //endregion
 }

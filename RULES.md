@@ -1,14 +1,5 @@
 # Rules for Tickets
 
-## TODOS
-
-- Add a new parameter to session entity (isClosed)
-
-- Write a scheduler for checking session closed or not for only today, if they are closed
-  then make them close
-
-- Create ticketViewDto (show owner, price, seat, hall, session, movie)
-
 ## Buying a new Ticket process
 
 1. If the session has already begun, then user can't buy a ticket. (maybe add a new parameter, to say session is closed

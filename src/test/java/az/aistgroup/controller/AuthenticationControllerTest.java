@@ -2,8 +2,8 @@ package az.aistgroup.controller;
 
 import az.aistgroup.exception.ErrorResponseCode;
 import az.aistgroup.security.TokenType;
-import az.aistgroup.security.jwt.JwtTokenProvider;
 import az.aistgroup.security.jwt.TokenProvider;
+import az.aistgroup.security.jwt.TokenValidityResponse;
 import az.aistgroup.util.TestUtils;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.DisplayName;
@@ -39,7 +39,7 @@ class AuthenticationControllerTest {
 
     @Test
     void returnTokenExpiredResponse_whenGivenRefreshTokenExpired() throws Exception {
-        var response = new JwtTokenProvider.TokenValidityResponse(false, ErrorResponseCode.TOKEN_EXPIRED);
+        var response = new TokenValidityResponse(false, ErrorResponseCode.TOKEN_EXPIRED);
         when(tokenProvider.checkTokenValidity(Mockito.anyString())).thenReturn(response);
 
         var refreshTokenDto = new AuthenticationController.RefreshTokenDto("refresh_token");
@@ -65,7 +65,7 @@ class AuthenticationControllerTest {
         String accessToken = "access_token";
 
         when(tokenProvider.checkTokenValidity(accessToken))
-                .thenReturn(new JwtTokenProvider.TokenValidityResponse(true, null));
+                .thenReturn(new TokenValidityResponse(true, null));
 
         var claims = new DefaultClaims(Map.of(TokenProvider.TOKEN_TYPE, TokenType.ACCESS_TOKEN));
         when(tokenProvider.getClaims(accessToken)).thenReturn(claims);

@@ -1,12 +1,11 @@
 package az.aistgroup.service;
 
 import az.aistgroup.domain.dto.MovieDto;
-import az.aistgroup.domain.dto.MovieViewDto;
 
 import java.util.List;
 
 public interface MovieService {
-    List<MovieViewDto> getAllMovies();
+    List<MovieDto> getAllMovies();
 
     MovieDto getMovieById(Long id);
 

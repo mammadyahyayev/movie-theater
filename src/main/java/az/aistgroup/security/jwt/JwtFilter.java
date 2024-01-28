@@ -1,6 +1,6 @@
-package az.aistgroup.security;
+package az.aistgroup.security.jwt;
 
-import az.aistgroup.security.jwt.TokenProvider;
+import az.aistgroup.security.AppSecurityProperties;
 import az.aistgroup.util.Strings;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -11,10 +11,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
+/**
+ * The JWT Filter is used to extract token from request headers and check its validity.
+ */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
@@ -43,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Returns token without 'Bearer' prefix if token starts with prefix,
+     * Returns token without <b>'Bearer'</b> prefix if token starts with prefix,
      * otherwise {@code null}
      *
      * @param request HTTP request

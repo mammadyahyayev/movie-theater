@@ -1,5 +1,8 @@
 package az.aistgroup.exception;
 
+/**
+ * The custom error response codes.
+ */
 public enum ErrorResponseCode {
     RESOURCE_NOT_FOUND("resource.not.found"),
     RESOURCE_ALREADY_EXIST("resource.exist"),

@@ -9,6 +9,9 @@ import org.springframework.context.annotation.Profile;
 import java.math.BigDecimal;
 import java.util.Set;
 
+/**
+ * The class is used to populate the database with demo data.
+ */
 @Profile("!test")
 public final class DataInitializer implements CommandLineRunner {
     private final UserService userService;

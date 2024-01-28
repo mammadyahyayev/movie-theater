@@ -1,7 +1,6 @@
 package az.aistgroup.repository;
 
 import az.aistgroup.domain.dto.MovieDto;
-import az.aistgroup.domain.dto.MovieViewDto;
 import az.aistgroup.domain.entity.Movie;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,7 +11,7 @@ import java.util.List;
 @Repository
 public interface MovieRepository extends CrudRepository<Movie, Long> {
     @Query("select m from Movie m")
-    List<MovieViewDto> findAllForMovieView();
+    List<MovieDto> findAllForMovieView();
 
     List<Movie> findByNameIsContainingIgnoreCase(String name);
 }

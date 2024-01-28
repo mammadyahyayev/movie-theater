@@ -46,12 +46,6 @@ public class User extends AbstractAuditingEntity<Long> {
     )
     private Set<Authority> authorities = new HashSet<>();
 
-    @OneToMany(
-            fetch = FetchType.LAZY, mappedBy = "user",
-            orphanRemoval = true, cascade = CascadeType.ALL
-    )
-    private Set<Ticket> tickets = new HashSet<>();
-
     public User() {
     }
 
@@ -59,6 +53,26 @@ public class User extends AbstractAuditingEntity<Long> {
         return this.firstName + " " + this.lastName + " " + this.fatherName;
     }
 
+    public void addAuthority(Authority authority) {
+        if (authority == null || Strings.isNullOrEmpty(authority.getName())) return;
+
+        authority.getUsers().add(this);
+        this.authorities.add(authority);
+    }
+
+    public void increaseBalance(BigDecimal amount) {
+        Objects.requireNonNull(amount, "amount can not be null!");
+
+        this.balance = this.balance.add(amount);
+    }
+
+    public void decreaseBalance(BigDecimal amount) {
+        Objects.requireNonNull(amount, "amount can not be null!");
+
+        this.balance = this.balance.subtract(amount);
+    }
+
+    //region Getters & Setters & Equals & HashCode & ToString
     @Override
     public Long getId() {
         return this.id;
@@ -117,35 +131,8 @@ public class User extends AbstractAuditingEntity<Long> {
         this.balance = balance;
     }
 
-    public Set<Ticket> getTickets() {
-        return tickets;
-    }
-
-    public void setTickets(Set<Ticket> tickets) {
-        this.tickets = tickets;
-    }
-
     public Set<Authority> getAuthorities() {
         return authorities;
-    }
-
-    public void addAuthority(Authority authority) {
-        if (authority == null || Strings.isNullOrEmpty(authority.getName())) return;
-
-        authority.getUsers().add(this);
-        this.authorities.add(authority);
-    }
-
-    public void increaseBalance(BigDecimal amount) {
-        Objects.requireNonNull(amount, "amount can not be null!");
-
-        this.balance = this.balance.add(amount);
-    }
-
-    public void decreaseBalance(BigDecimal amount) {
-        Objects.requireNonNull(amount, "amount can not be null!");
-
-        this.balance = this.balance.subtract(amount);
     }
 
     @Override
@@ -173,4 +160,5 @@ public class User extends AbstractAuditingEntity<Long> {
                 .add("balance=" + balance)
                 .toString();
     }
+    //endregion
 }

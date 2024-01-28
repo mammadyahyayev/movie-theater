@@ -7,11 +7,12 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-import java.io.IOException;
-
+/**
+ * The class is used to handle {@link AccessDeniedException} in filter levels. The
+ * exception handling is delegated to {@link GlobalExceptionHandler}.
+ */
 @Component
 public class AccessDeniedExceptionHandler implements AccessDeniedHandler {
-
     private final HandlerExceptionResolver handlerExceptionResolver;
 
     public AccessDeniedExceptionHandler(HandlerExceptionResolver handlerExceptionResolver) {
@@ -21,7 +22,7 @@ public class AccessDeniedExceptionHandler implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request,
                        HttpServletResponse response,
-                       AccessDeniedException accessDeniedException) throws IOException {
+                       AccessDeniedException accessDeniedException) {
         handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
     }
 }

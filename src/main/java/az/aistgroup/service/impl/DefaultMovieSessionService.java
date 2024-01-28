@@ -1,12 +1,12 @@
 package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.MovieSessionDto;
-import az.aistgroup.domain.dto.MovieSessionViewDto;
+import az.aistgroup.domain.dto.MovieSessionView;
 import az.aistgroup.domain.entity.Hall;
 import az.aistgroup.domain.entity.MovieSession;
 import az.aistgroup.domain.enumeration.MovieSessionTime;
 import az.aistgroup.domain.mapper.MovieSessionMapper;
-import az.aistgroup.exception.CapacityExceedException;
+import az.aistgroup.exception.HallCapacityExceedException;
 import az.aistgroup.exception.InvalidRequestException;
 import az.aistgroup.exception.ResourceAlreadyExistException;
 import az.aistgroup.exception.ResourceNotFoundException;
@@ -45,7 +45,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieSessionViewDto> getSessions() {
+    public List<MovieSessionView> getSessions() {
         return movieSessionRepository.getAllMovieSessions();
     }
 
@@ -59,7 +59,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
     @Override
     @Transactional
-    public MovieSessionDto addSession(final MovieSessionDto sessionDto) {
+    public MovieSessionDto addSession(MovieSessionDto sessionDto) {
         Objects.requireNonNull(sessionDto, "sessionDto can not be null!");
         Objects.requireNonNull(sessionDto.getPrice(), "Price of movie session can not be null!");
         Objects.requireNonNull(sessionDto.getMovieId(), "movieId can not be null!");
@@ -84,18 +84,17 @@ public class DefaultMovieSessionService implements MovieSessionService {
             String message = MessageFormat
                     .format("Number of tickets can not be more than capacity ({0}) of {1}",
                             hall.getCapacity(), hall.getName());
-            throw new CapacityExceedException(message);
+            throw new HallCapacityExceedException(message);
         }
 
-        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
-        LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
-        LocalDateTime now = LocalDateTime.now(clock);
-        Duration diff = Duration.between(now, sessionTime);
+        Duration diff = differenceBetweenNowAndSessionTime(sessionDto);
         if (diff.toMinutes() < 60 && diff.toMinutes() > 0) {
             throw new InvalidRequestException(
                     "You can't create a new session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
         }
 
+        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
+        LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
         movieSession.setDate(sessionTime);
         movieSession.setClosed(sessionDto.isClosed());
 
@@ -112,10 +111,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
         MovieSession movieSession = movieSessionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Session", id));
 
-        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
-        LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
-        LocalDateTime now = LocalDateTime.now(clock);
-        Duration diff = Duration.between(now, sessionTime);
+        Duration diff = differenceBetweenNowAndSessionTime(sessionDto);
         if (diff.toMinutes() < 60 && diff.toMinutes() > 0) {
             throw new InvalidRequestException(
                     "You can't update session because less than an hour left for " + sessionDto.getSessionTime() + " session!");
@@ -141,7 +137,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
             String message = MessageFormat
                     .format("Number of tickets can not be more than capacity({0}) of {1}",
                             hall.getCapacity(), hall.getName());
-            throw new CapacityExceedException(message);
+            throw new HallCapacityExceedException(message);
         } else {
             movieSession.setTicketsLeft(sessionDto.getTicketsLeft());
         }
@@ -151,6 +147,7 @@ public class DefaultMovieSessionService implements MovieSessionService {
         var updatedSession = movieSessionRepository.save(movieSession);
         return MovieSessionMapper.toDto(updatedSession);
     }
+
 
     @Override
     @Transactional
@@ -184,6 +181,19 @@ public class DefaultMovieSessionService implements MovieSessionService {
 
         return hallRepository.findById(hallId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hall", hallId));
+    }
+
+    /**
+     * Finds difference between current time and {@link MovieSession} time.
+     *
+     * @param sessionDto a Dto class
+     * @return {@link Duration} between dates.
+     */
+    private Duration differenceBetweenNowAndSessionTime(MovieSessionDto sessionDto) {
+        int hourOfDay = sessionDto.getSessionTime().getHourOfDay();
+        LocalDateTime sessionTime = sessionDto.getDate().withHour(hourOfDay);
+        LocalDateTime now = LocalDateTime.now(clock);
+        return Duration.between(now, sessionTime);
     }
 
 }

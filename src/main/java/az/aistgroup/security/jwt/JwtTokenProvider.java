@@ -21,6 +21,9 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * The class is used to manage JWT tokens.
+ */
 @Primary
 @Component
 public class JwtTokenProvider implements TokenProvider {
@@ -123,7 +126,5 @@ public class JwtTokenProvider implements TokenProvider {
         return new TokenValidityResponse(true, null);
     }
 
-    public record TokenValidityResponse(boolean isValid, ErrorResponseCode code) {
-    }
 
 }

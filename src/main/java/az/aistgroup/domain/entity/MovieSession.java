@@ -5,7 +5,6 @@ import az.aistgroup.exception.NoTicketsAvailableException;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,6 +34,19 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
 
     private boolean isClosed;
 
+    public void decreaseLeftTickets() {
+        if (this.ticketsLeft == 0) {
+            throw new NoTicketsAvailableException();
+        }
+
+        this.ticketsLeft--;
+    }
+
+    public int getHallCapacity() {
+        return this.hall.getCapacity();
+    }
+
+    //region Getters & Setters
     @Override
     public Long getId() {
         return this.id;
@@ -55,6 +67,10 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
 
     public MovieSessionTime getSessionTime() {
         return sessionTime;
+    }
+
+    public int getSessionHourOfDay() {
+        return this.sessionTime.getHourOfDay();
     }
 
     public void setSessionTime(MovieSessionTime sessionTime) {
@@ -100,20 +116,5 @@ public class MovieSession extends AbstractAuditingEntity<Long> {
     public void setClosed(boolean closed) {
         isClosed = closed;
     }
-
-    public void decreaseLeftTickets() {
-        if (this.ticketsLeft == 0) {
-            throw new NoTicketsAvailableException();
-        }
-
-        this.ticketsLeft--;
-    }
-
-    public void increaseLeftTickets() {
-        if (this.hall.getCapacity() == this.ticketsLeft) {
-            throw new IllegalArgumentException("Can not increase left tickets because it exceeds hall capacity!");
-        }
-
-        this.ticketsLeft++;
-    }
+    //endregion
 }

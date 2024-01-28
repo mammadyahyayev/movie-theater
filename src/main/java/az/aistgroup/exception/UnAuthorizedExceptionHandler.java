@@ -9,6 +9,10 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
 
+/**
+ * The class is used to handle {@link AuthenticationException} in filter levels. The
+ * exception handling is delegated to {@link GlobalExceptionHandler}.
+ */
 @Component
 public class UnAuthorizedExceptionHandler implements AuthenticationEntryPoint {
 

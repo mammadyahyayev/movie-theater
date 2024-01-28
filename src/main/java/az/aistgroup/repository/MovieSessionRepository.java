@@ -1,6 +1,6 @@
 package az.aistgroup.repository;
 
-import az.aistgroup.domain.dto.MovieSessionViewDto;
+import az.aistgroup.domain.dto.MovieSessionView;
 import az.aistgroup.domain.entity.MovieSession;
 import az.aistgroup.domain.enumeration.MovieSessionTime;
 import org.springframework.data.jpa.repository.Query;
@@ -20,7 +20,7 @@ public interface MovieSessionRepository extends CrudRepository<MovieSession, Lon
                 left join ms.movie m
                 left join ms.hall h\s
             """)
-    List<MovieSessionViewDto> getAllMovieSessions();
+    List<MovieSessionView> getAllMovieSessions();
 
     @Query("select ms from MovieSession ms where ms.hall.id = :hallId and ms.date = :date and ms.sessionTime = :sessionTime")
     Optional<MovieSession> findActiveSessionForHall(Long hallId, LocalDateTime date, MovieSessionTime sessionTime);

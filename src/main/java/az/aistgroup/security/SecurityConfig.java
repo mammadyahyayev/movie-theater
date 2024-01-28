@@ -2,6 +2,7 @@ package az.aistgroup.security;
 
 import az.aistgroup.exception.AccessDeniedExceptionHandler;
 import az.aistgroup.exception.UnAuthorizedExceptionHandler;
+import az.aistgroup.security.jwt.JwtFilter;
 import az.aistgroup.security.jwt.TokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -11,10 +11,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
+/**
+ * Abstract class is used to provide additional columns for tables that might be useful
+ * for monitoring.
+ *
+ * @param <T> Java type of the ID columns.
+ */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractAuditingEntity<T> {
     public abstract T getId();
+
     public abstract void setId(T id);
 
     @CreatedBy

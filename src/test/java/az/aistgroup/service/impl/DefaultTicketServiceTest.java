@@ -1,8 +1,8 @@
 package az.aistgroup.service.impl;
 
+import az.aistgroup.domain.dto.TicketDto;
 import az.aistgroup.domain.dto.TicketRefundDto;
 import az.aistgroup.domain.dto.TicketRequestDto;
-import az.aistgroup.domain.dto.TicketView;
 import az.aistgroup.domain.entity.*;
 import az.aistgroup.domain.enumeration.MovieGenre;
 import az.aistgroup.domain.enumeration.MovieSessionTime;
@@ -175,8 +175,8 @@ class DefaultTicketServiceTest {
         BigDecimal balanceBefore = savedUser.getBalance();
         BigDecimal expectedBalance = balanceBefore.subtract(savedMovieSession.getPrice());
 
-        TicketView ticketView = ticketService.buyTicket(ticketRequestDto);
-        assertThat(ticketView.getTicketHolder()).isEqualTo(savedUser.getFullName());
+        TicketDto ticketDto = ticketService.buyTicket(ticketRequestDto);
+        assertThat(ticketDto.getTicketHolder()).isEqualTo(savedUser.getFullName());
 
         Optional<User> user = userRepository.findUserByUsername(savedUser.getUsername());
         assertThat(user.isPresent()).isTrue();

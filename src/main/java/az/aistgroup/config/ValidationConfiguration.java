@@ -5,11 +5,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
+/**
+ * Configuration for Validation is used to validate requests.
+ * <p>
+ * It is explicitly declared for custom validation messages which are defined inside<br>
+ * <b>validationMessages.properties</b> file
+ * </p>
+ */
 @Configuration
 public class ValidationConfiguration {
     @Bean
     public ReloadableResourceBundleMessageSource messageSource() {
-        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        var messageSource = new ReloadableResourceBundleMessageSource();
         messageSource.setBasename("classpath:validationMessages");
         messageSource.setDefaultEncoding("UTF-8");
         return messageSource;
@@ -17,7 +24,7 @@ public class ValidationConfiguration {
 
     @Bean
     public LocalValidatorFactoryBean getValidator() {
-        LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
+        var bean = new LocalValidatorFactoryBean();
         bean.setValidationMessageSource(messageSource());
         return bean;
     }

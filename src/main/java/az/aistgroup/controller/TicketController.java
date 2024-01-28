@@ -1,6 +1,9 @@
 package az.aistgroup.controller;
 
-import az.aistgroup.domain.dto.*;
+import az.aistgroup.domain.dto.OperationResponseDto;
+import az.aistgroup.domain.dto.TicketDto;
+import az.aistgroup.domain.dto.TicketRefundDto;
+import az.aistgroup.domain.dto.TicketRequestDto;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.security.AuthorityConstant;
 import az.aistgroup.service.TicketService;
@@ -75,7 +78,7 @@ public class TicketController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Return a bought ticket.",
                     content = {@Content(mediaType = "application/hal+json",
-                            schema = @Schema(implementation = TicketView.class))}),
+                            schema = @Schema(implementation = TicketDto.class))}),
 
             @ApiResponse(responseCode = "404", description = "Returns when session or seat isn't found.",
                     content = {@Content(mediaType = "application/json",
@@ -97,14 +100,14 @@ public class TicketController {
                             schema = @Schema(implementation = ErrorResponse.class))})
     })
     @PostMapping("/buy")
-    public ResponseEntity<TicketView> buyTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
+    public ResponseEntity<TicketDto> buyTicket(@Valid @RequestBody TicketRequestDto ticketRequestDto) {
         String username = ticketRequestDto.getUsername();
         checkUserHasPermission(username);
 
-        TicketView ticket = ticketService.buyTicket(ticketRequestDto);
-        ticket.add(linkTo(methodOn(TicketController.class).getTicketById(ticket.getId(), username)).withSelfRel());
-        ticket.add(linkTo(TicketController.class).slash("/refund").withRel("refund"));
-        return new ResponseEntity<>(ticket, HttpStatus.OK);
+        TicketDto ticketDto = ticketService.buyTicket(ticketRequestDto);
+        ticketDto.add(linkTo(methodOn(TicketController.class).getTicketById(ticketDto.getId(), username)).withSelfRel());
+        ticketDto.add(linkTo(TicketController.class).slash("/refund").withRel("refund"));
+        return new ResponseEntity<>(ticketDto, HttpStatus.OK);
     }
 
     @Operation(summary = "Refunds a ticket.")

@@ -35,12 +35,12 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Returns all available users.",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserViewDto.class))})
+                            schema = @Schema(implementation = UserView.class))})
     })
     @GetMapping
     @PreAuthorize("hasAuthority(\"" + AuthorityConstant.ADMIN + "\")")
-    public ResponseEntity<List<UserViewDto>> getAllUsers() {
-        List<UserViewDto> users = userService.getAllUsers();
+    public ResponseEntity<List<UserView>> getAllUsers() {
+        List<UserView> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 

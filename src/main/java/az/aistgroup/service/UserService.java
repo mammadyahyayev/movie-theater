@@ -5,19 +5,17 @@ import az.aistgroup.domain.dto.*;
 import java.util.List;
 
 public interface UserService {
-    List<UserViewDto> getAllUsers();
+    List<UserView> getAllUsers();
 
     UserDto getUserByUsername(String username);
 
     boolean doesUserExist(String username);
 
-    UserView registerUser(RegisterDto registerDto);
+    UserModelView registerUser(RegisterDto registerDto);
 
     UserDto addUser(UserDto userDto);
 
     UserDto updateUser(String username, UpdateUserRequestDto userDto);
-
-    UserDto updateUserByAdmin(String username, UserDto userDto);
 
     void deleteUser(String username);
 

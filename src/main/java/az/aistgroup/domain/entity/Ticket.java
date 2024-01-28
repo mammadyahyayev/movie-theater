@@ -22,6 +22,22 @@ public class Ticket extends AbstractAuditingEntity<Long> {
     @JoinColumn(name = "user_id")
     private User user;
 
+    public String getSeatName() {
+        return this.getSeat().getHall().getName() + " Seat: " + this.getSeat().getSeatNum();
+    }
+
+    public String getTicketHolder() {
+        return this.getUser().getFullName();
+    }
+
+    public String getMovieSessionTime() {
+        return this.getMovieSession().getDate() + " " + this.getMovieSession().getSessionTime();
+    }
+
+    public String getMovieName() {
+        return this.getMovieSession().getMovie().getName();
+    }
+
     @Override
     public Long getId() {
         return this.id;

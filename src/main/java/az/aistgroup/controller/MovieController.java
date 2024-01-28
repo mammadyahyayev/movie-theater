@@ -1,7 +1,6 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.MovieDto;
-import az.aistgroup.domain.dto.MovieViewDto;
 import az.aistgroup.domain.dto.OperationResponseDto;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.exception.InvalidRequestException;
@@ -34,11 +33,11 @@ public class MovieController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Returns all available movies.",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = MovieViewDto.class))})
+                            schema = @Schema(implementation = MovieDto.class))})
     })
     @GetMapping
-    public ResponseEntity<List<MovieViewDto>> getAllMovies() {
-        List<MovieViewDto> movies = movieService.getAllMovies();
+    public ResponseEntity<List<MovieDto>> getAllMovies() {
+        List<MovieDto> movies = movieService.getAllMovies();
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 

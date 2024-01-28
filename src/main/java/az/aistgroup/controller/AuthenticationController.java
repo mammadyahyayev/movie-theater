@@ -3,7 +3,7 @@ package az.aistgroup.controller;
 import az.aistgroup.domain.dto.LoginDto;
 import az.aistgroup.domain.dto.RegisterDto;
 import az.aistgroup.domain.dto.UserDto;
-import az.aistgroup.domain.dto.UserView;
+import az.aistgroup.domain.dto.UserModelView;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.exception.TokenValidityException;
 import az.aistgroup.security.TokenType;
@@ -66,8 +66,10 @@ public class AuthenticationController {
     })
     @SecurityRequirements(value = {})
     @PostMapping("/register")
-    public ResponseEntity<UserView> register(@Valid @RequestBody RegisterDto registerDto) {
-        UserView user = userService.registerUser(registerDto);
+    public ResponseEntity<UserModelView> register(@Valid @RequestBody RegisterDto registerDto) {
+        LOG.debug("Request to register a new user with username: {}", registerDto.getUsername());
+
+        UserModelView user = userService.registerUser(registerDto);
         user.add(linkTo(AuthenticationController.class).slash("/login").withRel("login"));
         user.add(linkTo(UserController.class).slash("/balance/top-up").withRel("topUpBalance"));
         return new ResponseEntity<>(user, HttpStatus.CREATED);
@@ -125,6 +127,8 @@ public class AuthenticationController {
     })
     @PostMapping("/token/refresh")
     public ResponseEntity<JwtToken> getToken(@Valid @RequestBody RefreshTokenDto refreshTokenDto) {
+        LOG.debug("Request to get access token with refresh token");
+
         var refreshToken = refreshTokenDto.refreshToken();
 
         var tokenValidityResponse = tokenProvider.checkTokenValidity(refreshToken);
