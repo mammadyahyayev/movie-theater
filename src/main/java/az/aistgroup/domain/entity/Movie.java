@@ -17,6 +17,10 @@ public class Movie extends AbstractAuditingEntity<Long> {
     @Enumerated(EnumType.STRING)
     private MovieGenre genre;
 
+    private int releaseYear;
+
+    private double imdbRating;
+
     //region Getters & Setters
     @Override
     public Long getId() {
@@ -43,5 +47,22 @@ public class Movie extends AbstractAuditingEntity<Long> {
     public void setGenre(MovieGenre genre) {
         this.genre = genre;
     }
+
+    public int getReleaseYear() {
+        return releaseYear;
+    }
+
+    public void setReleaseYear(int releaseYear) {
+        this.releaseYear = releaseYear;
+    }
+
+    public double getImdbRating() {
+        return imdbRating;
+    }
+
+    public void setImdbRating(double imdbRating) {
+        this.imdbRating = imdbRating;
+    }
+
     //endregion
 }

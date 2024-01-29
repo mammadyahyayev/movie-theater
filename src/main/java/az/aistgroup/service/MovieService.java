@@ -1,6 +1,7 @@
 package az.aistgroup.service;
 
 import az.aistgroup.domain.dto.MovieDto;
+import az.aistgroup.domain.dto.MovieSearchCriteria;
 
 import java.util.List;
 
@@ -15,5 +16,5 @@ public interface MovieService {
 
     void deleteMovie(Long id);
 
-    List<MovieDto> searchMoviesByName(String movieName);
+    List<MovieDto> searchMovies(MovieSearchCriteria movieSearchCriteria);
 }

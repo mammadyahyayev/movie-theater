@@ -1,7 +1,9 @@
 package az.aistgroup.controller;
 
 import az.aistgroup.domain.dto.MovieDto;
+import az.aistgroup.domain.dto.MovieSearchCriteria;
 import az.aistgroup.domain.dto.OperationResponseDto;
+import az.aistgroup.domain.enumeration.MovieGenre;
 import az.aistgroup.exception.ErrorResponse;
 import az.aistgroup.exception.InvalidRequestException;
 import az.aistgroup.security.AuthorityConstant;
@@ -124,12 +126,22 @@ public class MovieController {
                             schema = @Schema(implementation = ErrorResponse.class))})
     })
     @GetMapping("/search")
-    public ResponseEntity<List<MovieDto>> searchMovies(@RequestParam("name") String name) {
+    public ResponseEntity<List<MovieDto>> searchMovies(
+            @RequestParam("name") String name,
+            @RequestParam(required = false) MovieGenre genre,
+            @RequestParam(required = false) Double imdbRating,
+            @RequestParam(required = false) Integer releaseYear
+    ) {
         if (!Strings.hasText(name)) {
             throw new InvalidRequestException("Movie name can not be empty!");
         }
+        var movieSearchCriteria = new MovieSearchCriteria();
+        movieSearchCriteria.setName(name);
+        movieSearchCriteria.setGenre(genre);
+        movieSearchCriteria.setImdbRating(imdbRating);
+        movieSearchCriteria.setReleaseYear(releaseYear);
 
-        List<MovieDto> movies = movieService.searchMoviesByName(name);
+        List<MovieDto> movies = movieService.searchMovies(movieSearchCriteria);
         return new ResponseEntity<>(movies, HttpStatus.OK);
     }
 }

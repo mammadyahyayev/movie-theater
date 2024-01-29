@@ -1,8 +1,8 @@
 package az.aistgroup.service.impl;
 
 import az.aistgroup.domain.dto.MovieDto;
+import az.aistgroup.domain.dto.MovieSearchCriteria;
 import az.aistgroup.domain.entity.Movie;
-import az.aistgroup.domain.enumeration.MovieGenre;
 import az.aistgroup.domain.mapper.MovieMapper;
 import az.aistgroup.exception.ResourceNotFoundException;
 import az.aistgroup.repository.MovieRepository;
@@ -62,9 +62,7 @@ public class DefaultMovieService implements MovieService {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie", id));
 
-        movie.setName(movieDto.getName());
-        movie.setGenre(MovieGenre.valueOf(movieDto.getGenre().toUpperCase()));
-
+        MovieMapper.toEntityInPlace(movieDto, movie);
         Movie updatedMovie = movieRepository.save(movie);
         LOG.debug("Movie with id: " + id + " is updated!");
         return MovieMapper.toDto(updatedMovie);
@@ -84,8 +82,9 @@ public class DefaultMovieService implements MovieService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MovieDto> searchMoviesByName(String movieName) {
-        List<Movie> movies = movieRepository.findByNameIsContainingIgnoreCase(movieName);
+    public List<MovieDto> searchMovies(MovieSearchCriteria criteria) {
+        Objects.requireNonNull(criteria, "criteria cannot be null!");
+        List<Movie> movies = movieRepository.findByCriteria(criteria);
         return movies.stream()
                 .map(MovieMapper::toDto)
                 .toList();
